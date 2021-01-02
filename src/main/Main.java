@@ -13,19 +13,11 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Locale locale = Locale.getDefault();
-        switch (locale.getLanguage()) {
-            case "en":
-            case "fr":
-                break;
-            default:
-                locale = new Locale("en", "US");
-        }
-//        locale = new Locale("fr", "CA");
+        Locale locale = Controllers.Base.getLocale();
         ResourceBundle bundle = ResourceBundle.getBundle("App", locale);
 
         Parent root = FXMLLoader.load(getClass().getResource("/Views/Login.fxml"), bundle);
-        primaryStage.setTitle(bundle.getString("Login.welcome"));
+        primaryStage.setTitle(bundle.getString("login.welcome"));
         primaryStage.setScene(new Scene(root, 600, 400));
         primaryStage.show();
     }
