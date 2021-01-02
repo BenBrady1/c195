@@ -12,6 +12,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+/**
+ * an abstract base controller class with helper methods that can be used across controllers
+ */
 abstract public class Base {
     private static final Locale coercedLocale = coerceLocale();
 
@@ -40,7 +43,8 @@ abstract public class Base {
         return coercedLocale;
     }
 
-    Connection conn;
+    protected Connection conn;
+    protected Main mainController;
 
     {
         try {
@@ -129,5 +133,9 @@ abstract public class Base {
         System.out.println("SQLException: " + ex.getMessage());
         System.out.println("SQLState: " + ex.getSQLState());
         System.out.println("VendorError: " + ex.getErrorCode());
+    }
+
+    protected void setMainController(Main mainController) {
+        this.mainController = mainController;
     }
 }

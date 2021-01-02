@@ -23,6 +23,9 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
+/**
+ * negotiates the login flow
+ */
 public final class Login extends Base implements Initializable {
     @FXML
     private TextField usernameField;
