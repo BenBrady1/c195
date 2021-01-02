@@ -17,6 +17,7 @@ import java.util.function.BiFunction;
  */
 abstract public class Base {
     private static final Locale coercedLocale = coerceLocale();
+    protected static Connection conn;
 
     /**
      * Sets the locale to be used for the duration of the program
@@ -43,15 +44,16 @@ abstract public class Base {
         return coercedLocale;
     }
 
-    protected Connection conn;
-    protected Main mainController;
+    protected View viewController;
 
     {
-        try {
-            conn = createDatabaseConnection();
-        } catch (SQLException ex) {
-            printSQLException(ex);
-            conn = null;
+        if (conn == null) {
+            try {
+                createDatabaseConnection();
+            } catch (SQLException ex) {
+                printSQLException(ex);
+                conn = null;
+            }
         }
     }
 
@@ -135,7 +137,7 @@ abstract public class Base {
         System.out.println("VendorError: " + ex.getErrorCode());
     }
 
-    protected void setMainController(Main mainController) {
-        this.mainController = mainController;
+    protected void setViewController(View viewController) {
+        this.viewController = viewController;
     }
 }

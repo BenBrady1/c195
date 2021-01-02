@@ -72,6 +72,9 @@ public final class Login extends Base implements Initializable {
             final boolean success =
                     executeQuery("SELECT * FROM users WHERE User_Name = ? LIMIT 1", arguments, this::validateUsernameAndPassword);
             logLoginAttempt(success);
+            if (success) {
+                viewController.showMainView();
+            }
         }
     }
 

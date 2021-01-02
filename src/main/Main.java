@@ -1,5 +1,6 @@
 package main;
 
+import Controllers.View;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -11,8 +12,8 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         final Scene scene = new Scene(new StackPane());
 
-        Controllers.Main mainController = new Controllers.Main(scene, primaryStage);
-        mainController.showLoginView();
+        View viewController = new View(scene, primaryStage);
+        viewController.showLoginView();
 
         primaryStage.setScene(scene);
         primaryStage.show();
