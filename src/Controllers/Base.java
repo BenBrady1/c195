@@ -10,6 +10,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.function.BiFunction;
 
 /**
@@ -17,6 +18,7 @@ import java.util.function.BiFunction;
  */
 abstract public class Base {
     private static final Locale coercedLocale = coerceLocale();
+    protected final static ResourceBundle bundle = ResourceBundle.getBundle("App", getLocale());
     protected static Connection conn;
 
     /**

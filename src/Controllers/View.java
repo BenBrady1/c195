@@ -4,16 +4,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.util.ResourceBundle;
-
 /**
  * manages which view to display at any given point
  */
 public final class View extends Base {
     private Scene scene;
     private Stage primaryStage;
-
-    private final static ResourceBundle bundle = ResourceBundle.getBundle("App", getLocale());
 
     public View(final Scene scene, final Stage primaryStage) {
         this.scene = scene;
@@ -26,12 +22,13 @@ public final class View extends Base {
      * @throws Exception any exception within the scene building
      */
     public void showLoginView() throws Exception {
-        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Login.fxml"), bundle);
-        scene.setRoot(loader.load());
-        loader.<Login>getController().setViewController(this);
+        showMainView();
+//        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Login.fxml"), bundle);
+//        scene.setRoot(loader.load());
+//        loader.<Login>getController().setViewController(this);
         primaryStage.setTitle(bundle.getString("app.title"));
-        primaryStage.setWidth(600);
-        primaryStage.setHeight(400);
+//        primaryStage.setWidth(600);
+//        primaryStage.setHeight(400);
     }
 
     public void showMainView() {
