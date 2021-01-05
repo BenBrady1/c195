@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0"
+            prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <bottom>
+        <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <buttons>
+                <Button defaultButton="true" mnemonicParsing="false" onAction="#handleSave" text="%form.save"/>
+                <Button cancelButton="true" mnemonicParsing="false" onAction="#handleClose" text="%form.cancel"/>
+            </buttons>
+            <opaqueInsets>
+                <Insets/>
+            </opaqueInsets>
+            <padding>
+                <Insets right="10.0"/>
+            </padding>
+        </ButtonBar>
+    </bottom>
+    <center>
+        <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <children>
+                <TextField fx:id="idField" layoutX="52.0" layoutY="31.0"/>
+                <TextField fx:id="nameField" layoutX="52.0" layoutY="85.0"/>
+                <TextField fx:id="postalCodeField" layoutX="52.0" layoutY="130.0"/>
+                <TextField fx:id="phoneField" layoutX="52.0" layoutY="176.0"/>
+                <ComboBox fx:id="divisionComboBox" layoutX="51.0" layoutY="231.0" prefWidth="150.0"/>
+                <ComboBox fx:id="countryComboBox" layoutX="51.0" layoutY="287.0" prefWidth="150.0"/>
+            </children>
+        </AnchorPane>
+    </center>
+</BorderPane>

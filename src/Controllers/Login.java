@@ -41,19 +41,22 @@ public final class Login extends Base implements Initializable {
      * @param rs a result set containing 1 or 0 rows
      * @return whether the password from the form matches the password in the database
      */
-    private boolean validateUsernameAndPassword(SQLException ex, ResultSet rs) {
-        boolean result = false;
+    private int validateUsernameAndPassword(SQLException ex, ResultSet rs) {
+        int result = -1;
         if (ex == null) {
             final String username = usernameField.getText();
             final String password = passwordField.getText();
             try {
-                result = rs.next()
-                        ? rs.getString("Password").trim().equals(hashPassword().trim())
-                        : username == "test" && password == "test";
+                if (rs.next() && rs.getString("Password").trim().equals(hashPassword().trim())) {
+                    result = rs.getInt("User_ID");
+                } else if (username == "test" && password == "test") {
+                    result = 0;
+                }
             } catch (SQLException exc) {
                 printSQLException(exc);
             }
         }
+
         return result;
     }
 
@@ -69,11 +72,13 @@ public final class Login extends Base implements Initializable {
         if (username.length() != 0 && password.length() != 0) {
             final HashMap<Integer, Object> arguments = new HashMap();
             arguments.put(1, username);
-            final boolean success =
-                    executeQuery("SELECT * FROM users WHERE User_Name = ? LIMIT 1", arguments, this::validateUsernameAndPassword);
-            logLoginAttempt(success);
-            if (success) {
-                viewController.showMainView();
+            final int userId = executeQuery("SELECT User_ID, Password " +
+                    "FROM users " +
+                    "WHERE User_Name = ? " +
+                    "LIMIT 1", arguments, this::validateUsernameAndPassword);
+            logLoginAttempt(userId != -1);
+            if (userId != -1) {
+                viewController.showMainView(userId);
             }
         }
     }

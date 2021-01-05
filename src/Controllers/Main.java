@@ -8,6 +8,7 @@ import javafx.scene.control.TabPane;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class Main extends Base implements Initializable {
@@ -17,6 +18,8 @@ public class Main extends Base implements Initializable {
     Tab customerTab;
     @FXML
     Tab appointmentTab;
+
+    private Optional<Integer> userId;
 
     private boolean customerTabInitialized = false;
 
@@ -42,7 +45,7 @@ public class Main extends Base implements Initializable {
         customerTabInitialized = true;
         System.out.println("Fetching customer data");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Table.fxml"), bundle);
-        loader.setController(new CustomerTable());
+        loader.setController(new CustomerTable(getUserId()));
         try {
             customerTab.setContent(loader.load());
         } catch (IOException ex) {
@@ -52,5 +55,13 @@ public class Main extends Base implements Initializable {
 
     private void populateAppointmentData() {
         System.out.println("Fetching appointment data");
+    }
+
+    public Optional<Integer> getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = Optional.of(userId);
     }
 }

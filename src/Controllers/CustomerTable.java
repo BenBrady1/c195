@@ -1,18 +1,17 @@
 package Controllers;
 
 import Models.Customer;
-import Models.Item;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
-public final class CustomerTable extends Table {
-    @FXML
-    protected TableView<Customer> tableView;
+public final class CustomerTable extends Table<Customer> {
+    public CustomerTable(Optional<Integer> userId) {
+        super(userId, new CustomerFormFactory());
+    }
 
     @Override
     protected final void addColumns() {
@@ -48,23 +47,22 @@ public final class CustomerTable extends Table {
     }
 
     @Override
-    protected void addToDatabase(Item item) {
+    protected void addToDatabase(Customer item) {
         // TODO: implement
     }
 
     @Override
-    protected Item getNewItem() {
-        // TODO: implement
-        return null;
+    protected Customer getNewItem() {
+        return new Customer(0, "", "", "", "", "", "");
     }
 
     @Override
-    protected void updateInDatabase(Item item) {
+    protected void updateInDatabase(Customer item) {
         // TODO: implement
     }
 
     @Override
-    protected void deleteFromDatabase(Item item) {
+    protected void deleteFromDatabase(Customer item) {
         // TODO: implement
     }
 

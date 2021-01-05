@@ -22,7 +22,7 @@ public final class View extends Base {
      * @throws Exception any exception within the scene building
      */
     public void showLoginView() throws Exception {
-        showMainView();
+        showMainView(1);
 //        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Login.fxml"), bundle);
 //        scene.setRoot(loader.load());
 //        loader.<Login>getController().setViewController(this);
@@ -31,11 +31,15 @@ public final class View extends Base {
 //        primaryStage.setHeight(400);
     }
 
-    public void showMainView() {
+    public void showMainView(int userId) {
         try {
             final FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Main.fxml"), bundle);
             scene.setRoot(loader.load());
-            loader.<Main>getController().setViewController(this);
+            final Main mainController = loader.getController();
+            mainController.setViewController(this);
+            if (userId != 0) {
+                mainController.setUserId(userId);
+            }
             primaryStage.setWidth(800);
             primaryStage.setHeight(600);
         } catch (Exception e) {
