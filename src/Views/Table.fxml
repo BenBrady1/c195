@@ -4,8 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml" prefHeight="200.0" prefWidth="200.0">
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" prefHeight="200.0" prefWidth="200.0">
     <center>
         <TableView fx:id="tableView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <columns>
@@ -15,10 +14,10 @@
     <bottom>
         <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <buttons>
-                <Button mnemonicParsing="false" text="%button.add" onAction="#addItem"/>
-                <Button mnemonicParsing="false" text="%button.view" onAction="#viewItem"/>
-                <Button mnemonicParsing="false" text="%button.edit" onAction="#editItem"/>
-                <Button mnemonicParsing="false" text="%button.delete" onAction="#deleteItem"/>
+                <Button mnemonicParsing="false" text="%button.add" onAction="#addRecord"/>
+                <Button mnemonicParsing="false" text="%button.view" onAction="#viewRecord"/>
+                <Button mnemonicParsing="false" text="%button.edit" onAction="#editRecord"/>
+                <Button mnemonicParsing="false" text="%button.delete" onAction="#deleteRecord"/>
             </buttons>
             <padding>
                 <Insets right="10.0"/>

@@ -7,10 +7,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.net.URI;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 /**
@@ -90,7 +88,8 @@ abstract public class Base {
      * @throws SQLException any exception that occurs when trying to connect to the DB
      */
     private Connection createDatabaseConnection() throws SQLException {
-        if (conn != null) return conn;
+        if (conn != null && !conn.isClosed()) return conn;
+        conn = null;
         try {
             conn = DriverManager.getConnection(getConnectionString());
         } catch (Exception e) {
@@ -101,21 +100,53 @@ abstract public class Base {
     }
 
     /**
+     * A wrapper around Base#executeQuery(String, Object[], BiFunction) for when there are no arguments and no value is
+     * needed from the callback function
+     *
+     * @param query   the query to execute
+     * @param handler a function to handle any errors or result sets from the query
+     * @see Base#executeQuery(String, Object[], BiFunction)
+     */
+    protected void executeQuery(String query, BiConsumer<SQLException, ResultSet> handler) {
+        executeQuery(query, null, (ex, rs) -> {
+            handler.accept(ex, rs);
+            return null;
+        });
+    }
+
+    /**
+     * A wrapper around Base#executeQuery(String, Object[], BiFunction) for when no value is needed from the callback
+     * function
+     *
+     * @param query     the query to execute
+     * @param arguments an array of arguments
+     * @param handler   a function to handle any errors or result sets from the query
+     * @see Base#executeQuery(String, Object[], BiFunction)
+     */
+    protected void executeQuery(String query, Object[] arguments, BiConsumer<SQLException, ResultSet> handler) {
+        executeQuery(query, arguments, (ex, rs) -> {
+            handler.accept(ex, rs);
+            return null;
+        });
+    }
+
+    /**
      * A wrapper around the SQL query that allows for a lambda function to be passed as an argument
      * for a Node-esque error-first callback style. This allows for the caller to consume the result
      * set or error and for the resources to be cleaned up in a DRY manner
      *
      * @param query     the query to execute
-     * @param arguments a hashmap
-     * @param handler   a function to handle any errors or result sets from the query
+     * @param arguments an array of arguments
+     * @param handler   a function to handle any errors or result sets from the query, its return value will be returned
+     *                  from this function
      */
     protected <T> T executeQuery(String query,
-                                 HashMap<Integer, Object> arguments,
+                                 Object[] arguments,
                                  BiFunction<SQLException, ResultSet, T> handler) {
         try (var stmt = createDatabaseConnection().prepareStatement(query)) {
             if (arguments != null) {
-                for (Map.Entry<Integer, Object> entry : arguments.entrySet()) {
-                    stmt.setObject(entry.getKey(), entry.getValue());
+                for (int i = 0; i < arguments.length; i++) {
+                    stmt.setObject(i + 1, arguments[i]);
                 }
             }
 
@@ -125,6 +156,55 @@ abstract public class Base {
         } catch (SQLException ex) {
             printSQLException(ex);
             return handler.apply(ex, null);
+        }
+    }
+
+    protected void executeInsert(String query,
+                                 Object[] arguments,
+                                 BiConsumer<SQLException, Long> handler) {
+        try (
+                Connection connection = createDatabaseConnection();
+                PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+        ) {
+            if (arguments != null) {
+                for (int i = 0; i < arguments.length; i++) {
+                    stmt.setObject(i + 1, arguments[i]);
+                }
+            }
+
+            stmt.executeUpdate();
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    handler.accept(null, generatedKeys.getLong(1));
+                } else {
+                    throw new SQLException("Creating user failed, no ID obtained.");
+                }
+            }
+        } catch (SQLException ex) {
+            printSQLException(ex);
+            handler.accept(ex, null);
+        }
+    }
+
+    protected void executeUpdate(String query,
+                                 Object[] arguments,
+                                 BiConsumer<SQLException, Integer> handler) {
+        try (
+                Connection connection = createDatabaseConnection();
+                PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+        ) {
+            if (arguments != null) {
+                for (int i = 0; i < arguments.length; i++) {
+                    stmt.setObject(i + 1, arguments[i]);
+                }
+            }
+
+            int affectedRows = stmt.executeUpdate();
+            handler.accept(null, affectedRows);
+        } catch (SQLException ex) {
+            printSQLException(ex);
+            handler.accept(ex, null);
         }
     }
 

@@ -50,6 +50,7 @@ public class Main extends Base implements Initializable {
             customerTab.setContent(loader.load());
         } catch (IOException ex) {
             System.out.println(ex);
+            ex.printStackTrace();
         }
     }
 

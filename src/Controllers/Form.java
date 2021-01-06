@@ -1,6 +1,6 @@
 package Controllers;
 
-import Models.Item;
+import Models.Record;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,18 +12,23 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-public abstract class Form<T extends Item> extends Base implements Initializable {
+public abstract class Form<T extends Record> extends Base implements Initializable {
     public enum Mode {
         Create,
         Read,
         Update
     }
 
-    protected T item;
+    protected T record;
     protected Mode mode;
     protected boolean readOnly = true;
     protected Consumer<T> callback;
     private Stage stage;
+    private String windowTitle;
+
+    public Form(String windowTitle) {
+        this.windowTitle = windowTitle;
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -32,26 +37,29 @@ public abstract class Form<T extends Item> extends Base implements Initializable
         }
     }
 
-    public void open(T item, Mode mode, Consumer<T> callback) {
-        this.item = item;
+    public void open(T record, Mode mode, Consumer<T> callback) {
+        this.record = record;
         this.mode = mode;
         readOnly = mode == Mode.Read;
         this.callback = callback;
         openForm();
     }
 
-    private void callCallback(T item) {
+    private void callCallback(T record) {
         if (callback != null) {
-            callback.accept(item);
+            callback.accept(record);
         }
         callback = null;
     }
 
     @FXML
     private void handleSave() {
-        callCallback(item);
+        validateRecord();
+        callCallback(record);
         handleClose();
     }
+
+    protected abstract void validateRecord();
 
     /**
      * called when the cancel button is clicked or any time the form must be closed
@@ -67,8 +75,11 @@ public abstract class Form<T extends Item> extends Base implements Initializable
     }
 
     protected abstract void setFields();
-    protected abstract String getWindowTitle();
     protected abstract String getResourceURL();
+
+    private String getWindowTitle() {
+        return windowTitle;
+    }
 
     /**
      * Opens a new window with the correct form for the controller

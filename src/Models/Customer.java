@@ -1,21 +1,19 @@
 package Models;
 
-public final class Customer extends Item {
+public final class Customer extends Record {
     private String name;
     private String address;
     private String postalCode;
     private String phone;
-    private String division;
-    private String country;
+    private long divisionId;
 
-    public Customer(int id, String name, String address, String postalCode, String phone, String division, String country) {
-        this.id = id;
+    public Customer(int id, String name, String address, String postalCode, String phone, int divisionId) {
+        super(id);
         this.name = name;
         this.address = address;
         this.postalCode = postalCode;
         this.phone = phone;
-        this.division = division;
-        this.country = country;
+        this.divisionId = divisionId;
     }
 
     public String getName() {
@@ -50,19 +48,15 @@ public final class Customer extends Item {
         this.phone = phone;
     }
 
-    public String getDivision() {
-        return division;
+    public long getDivisionId() {
+        return divisionId;
     }
 
-    public void setDivision(String division) {
-        this.division = division;
+    public void setDivisionId(long divisionId) {
+        this.divisionId = divisionId;
     }
 
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
+    public Object[] toValues() {
+        return new Object[]{name, address, postalCode, phone, divisionId};
     }
 }

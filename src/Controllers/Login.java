@@ -70,12 +70,10 @@ public final class Login extends Base implements Initializable {
         final String username = usernameField.getText();
         final String password = passwordField.getText();
         if (username.length() != 0 && password.length() != 0) {
-            final HashMap<Integer, Object> arguments = new HashMap();
-            arguments.put(1, username);
             final int userId = executeQuery("SELECT User_ID, Password " +
                     "FROM users " +
                     "WHERE User_Name = ? " +
-                    "LIMIT 1", arguments, this::validateUsernameAndPassword);
+                    "LIMIT 1", new String[]{username}, this::validateUsernameAndPassword);
             logLoginAttempt(userId != -1);
             if (userId != -1) {
                 viewController.showMainView(userId);
