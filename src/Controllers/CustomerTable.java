@@ -14,15 +14,15 @@ public final class CustomerTable extends Table<Customer> {
     private final HashMap<Long, Division> divisionMap = new HashMap();
     private final List<Country> countries = new ArrayList();
     private final String insertStatement = "INSERT INTO customers " +
-            "(Customer_Name, Address, Postal_Code, Phone, Division_ID) " +
-            "VALUES (?, ?, ?, ?, ?)";
+            "(Customer_Name, Address, Postal_Code, Phone, Division_ID, Created_By, Last_Updated_By) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
     private final String updateStatement = "UPDATE customers " +
-            "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ? " +
+            "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ?, Last_Updated_By = ?, Last_Update = NOW() " +
             "WHERE Customer_ID = ?";
     private final String deleteStatement = "DELETE FROM customers WHERE Customer_ID = ?";
 
-    public CustomerTable(Optional<Integer> userId) {
-        super(userId, new CustomerFormFactory());
+    public CustomerTable() {
+        super(new CustomerFormFactory());
         ((CustomerFormFactory) formFactory).setDivisionMap(Collections.unmodifiableMap(divisionMap));
         ((CustomerFormFactory) formFactory).setCountries(Collections.unmodifiableList(countries));
     }

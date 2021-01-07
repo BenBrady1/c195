@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 /**
@@ -41,14 +42,14 @@ public final class Login extends Base implements Initializable {
      * @param rs a result set containing 1 or 0 rows
      * @return whether the password from the form matches the password in the database
      */
-    private int validateUsernameAndPassword(SQLException ex, ResultSet rs) {
-        int result = -1;
+    private long validateUsernameAndPassword(SQLException ex, ResultSet rs) {
+        long result = -1L;
         if (ex == null) {
             final String username = usernameField.getText();
             final String password = passwordField.getText();
             try {
                 if (rs.next() && rs.getString("Password").trim().equals(hashPassword().trim())) {
-                    result = rs.getInt("User_ID");
+                    result = rs.getLong("User_ID");
                 } else if (username == "test" && password == "test") {
                     result = 0;
                 }
@@ -70,13 +71,13 @@ public final class Login extends Base implements Initializable {
         final String username = usernameField.getText();
         final String password = passwordField.getText();
         if (username.length() != 0 && password.length() != 0) {
-            final int userId = executeQuery("SELECT User_ID, Password " +
+            final long userId = executeQuery("SELECT User_ID, Password " +
                     "FROM users " +
                     "WHERE User_Name = ? " +
                     "LIMIT 1", new String[]{username}, this::validateUsernameAndPassword);
             logLoginAttempt(userId != -1);
             if (userId != -1) {
-                viewController.showMainView(userId);
+                Base.userId = Optional.ofNullable(userId);
             }
         }
     }

@@ -1,5 +1,6 @@
 package Controllers;
 
+import javafx.scene.control.Alert;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -18,6 +19,7 @@ abstract public class Base {
     private static final Locale coercedLocale = coerceLocale();
     protected final static ResourceBundle bundle = ResourceBundle.getBundle("App", getLocale());
     protected static Connection conn;
+    protected static Optional<Long> userId = Optional.ofNullable(null);
 
     /**
      * Sets the locale to be used for the duration of the program
@@ -160,15 +162,15 @@ abstract public class Base {
     }
 
     protected void executeInsert(String query,
-                                 Object[] arguments,
+                                 List<Object> arguments,
                                  BiConsumer<SQLException, Long> handler) {
         try (
                 Connection connection = createDatabaseConnection();
                 PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
             if (arguments != null) {
-                for (int i = 0; i < arguments.length; i++) {
-                    stmt.setObject(i + 1, arguments[i]);
+                for (int i = 0; i < arguments.size(); i++) {
+                    stmt.setObject(i + 1, arguments.get(i));
                 }
             }
 
@@ -188,15 +190,15 @@ abstract public class Base {
     }
 
     protected void executeUpdate(String query,
-                                 Object[] arguments,
+                                 List<Object> arguments,
                                  BiConsumer<SQLException, Integer> handler) {
         try (
                 Connection connection = createDatabaseConnection();
                 PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
             if (arguments != null) {
-                for (int i = 0; i < arguments.length; i++) {
-                    stmt.setObject(i + 1, arguments[i]);
+                for (int i = 0; i < arguments.size(); i++) {
+                    stmt.setObject(i + 1, arguments.get(i));
                 }
             }
 
@@ -221,5 +223,28 @@ abstract public class Base {
 
     protected void setViewController(View viewController) {
         this.viewController = viewController;
+    }
+
+    /**
+     * A wrapper around Base#displayError(String, String) with a default title
+     *
+     * @param ex the error holding the message to display
+     */
+    protected void displayError(Exception ex) {
+        displayError("Error!", ex.getMessage());
+    }
+
+    /**
+     * Used to display validation errors to the end user.
+     *
+     * @param title   the title for the error message alert
+     * @param message the error message to be displayed
+     */
+    protected void displayError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

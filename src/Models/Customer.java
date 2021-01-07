@@ -1,5 +1,9 @@
 package Models;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
 public final class Customer extends Record implements Model<Customer> {
     private String name;
     private String address;
@@ -21,7 +25,7 @@ public final class Customer extends Record implements Model<Customer> {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = name.trim();
     }
 
     public String getAddress() {
@@ -29,7 +33,7 @@ public final class Customer extends Record implements Model<Customer> {
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this.address = address.trim();
     }
 
     public String getPostalCode() {
@@ -37,7 +41,7 @@ public final class Customer extends Record implements Model<Customer> {
     }
 
     public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
+        this.postalCode = postalCode.trim();
     }
 
     public String getPhone() {
@@ -45,7 +49,7 @@ public final class Customer extends Record implements Model<Customer> {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = phone.trim();
     }
 
     public long getDivisionId() {
@@ -57,8 +61,8 @@ public final class Customer extends Record implements Model<Customer> {
     }
 
     @Override
-    public Object[] toValues() {
-        return new Object[]{name, address, postalCode, phone, divisionId};
+    public List<Object> toValues() {
+        return new ArrayList<Object>(List.of(name, address, postalCode, phone, divisionId));
     }
 
     @Override
@@ -68,16 +72,11 @@ public final class Customer extends Record implements Model<Customer> {
 
     @Override
     public Customer applyChanges(Customer other) {
-        this.name = other.name;
-        this.address = other.address;
-        this.postalCode = other.postalCode;
-        this.phone = other.phone;
-        this.divisionId = other.divisionId;
+        this.setName(other.name);
+        this.setAddress(other.address);
+        this.setPostalCode(other.postalCode);
+        this.setPhone(other.phone);
+        this.setDivisionId(other.divisionId);
         return this;
-    }
-
-    @Override
-    public Object[] toValuesWithID() {
-        return new Object[]{name, address, postalCode, phone, divisionId, id};
     }
 }

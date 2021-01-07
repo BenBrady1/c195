@@ -4,6 +4,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.Optional;
+
 /**
  * manages which view to display at any given point
  */
@@ -22,7 +24,8 @@ public final class View extends Base {
      * @throws Exception any exception within the scene building
      */
     public void showLoginView() throws Exception {
-        showMainView(1);
+        userId = Optional.ofNullable(1L);
+        showMainView();
 //        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Login.fxml"), bundle);
 //        scene.setRoot(loader.load());
 //        loader.<Login>getController().setViewController(this);
@@ -31,15 +34,12 @@ public final class View extends Base {
 //        primaryStage.setHeight(400);
     }
 
-    public void showMainView(int userId) {
+    public void showMainView() {
         try {
             final FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Main.fxml"), bundle);
             scene.setRoot(loader.load());
             final Main mainController = loader.getController();
             mainController.setViewController(this);
-            if (userId != 0) {
-                mainController.setUserId(userId);
-            }
             primaryStage.setWidth(800);
             primaryStage.setHeight(600);
         } catch (Exception e) {

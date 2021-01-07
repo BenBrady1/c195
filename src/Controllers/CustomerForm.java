@@ -1,8 +1,6 @@
 package Controllers;
 
-import Models.Country;
-import Models.Customer;
-import Models.Division;
+import Models.*;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -91,12 +89,16 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
     }
 
     @Override
-    protected void validateRecord() {
-        record.setName(nameField.getText());
-        record.setAddress(addressField.getText());
-        record.setPostalCode(postalCodeField.getText());
-        record.setPhone(phoneField.getText());
-        record.setDivisionId(divisionComboBox.getSelectionModel().getSelectedItem().getId());
+    protected void validateRecord() throws Record.ValidationError {
+        record.setName(nameField.getText().trim());
+        record.setAddress(addressField.getText().trim());
+        record.setPostalCode(postalCodeField.getText().trim());
+        record.setPhone(phoneField.getText().trim());
+        long divisionId = Optional.ofNullable(divisionComboBox.getSelectionModel().getSelectedItem())
+                .map(Division::getId)
+                .orElse(0L);
+        record.setDivisionId(divisionId);
+        record.validate();
     }
 
     private Country findCountry(long countryId) {
@@ -105,5 +107,15 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
         }
 
         return null;
+    }
+
+    @Override
+    protected double getHeight() {
+        return 400;
+    }
+
+    @Override
+    protected double getWidth() {
+        return 400;
     }
 }

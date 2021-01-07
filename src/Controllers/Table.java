@@ -9,6 +9,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -22,11 +24,9 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     protected abstract void populateData();
 
     protected Form<T> formController;
-    protected Optional<Integer> userId;
     protected FormFactory formFactory;
 
-    public Table(Optional<Integer> userId, FormFactory formFactory) {
-        this.userId = userId;
+    public Table(FormFactory formFactory) {
         this.formFactory = formFactory;
     }
 
@@ -84,15 +84,16 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     @FXML
     private void viewRecord() {
         T selected = getSelectedRecord();
-        System.out.println(selected);
         if (selected != null && formController == null) {
-            System.out.println("view record called");
             openForm(FormFactory.Type.Read, selected, Form.Mode.Read, (record) -> finalizeAction());
         }
     }
 
     protected void updateInDatabase(T record) {
-        executeUpdate(getUpdateStatement(), record.toValuesWithID(), (ex, updateCount) -> {
+        List<Object> arguments = record.toValues();
+        arguments.add(userId.orElse(null));
+        arguments.add(record.getId());
+        executeUpdate(getUpdateStatement(), arguments, (ex, updateCount) -> {
             if (ex != null) printSQLException(ex);
             if (updateCount == 1) getSelectedRecord().applyChanges(record);
         });
@@ -102,10 +103,10 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     @FXML
     private void editRecord() {
-        T selected = getSelectedRecord().copy();
+        T selected = getSelectedRecord();
         if (selected != null && formController == null) {
             System.out.println("edit record called");
-            openForm(FormFactory.Type.Update, selected, Form.Mode.Update, (updatedRecord) -> {
+            openForm(FormFactory.Type.Update, selected.copy(), Form.Mode.Update, (updatedRecord) -> {
                 if (updatedRecord != null) updateInDatabase(updatedRecord);
                 finalizeAction();
             });
@@ -113,7 +114,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     protected void deleteFromDatabase(T record) {
-        executeUpdate(getDeleteStatement(), new Object[]{record.getId()}, (ex, updates) -> {
+        executeUpdate(getDeleteStatement(), new ArrayList<>(List.of(record.getId())), (ex, updates) -> {
             if (ex != null) printSQLException(ex);
             if (updates == 1) record.setId(0);
         });

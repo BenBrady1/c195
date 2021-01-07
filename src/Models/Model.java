@@ -1,11 +1,11 @@
 package Models;
 
+import java.util.List;
+
 public interface Model<T> {
     T copy();
 
-    Object[] toValues();
-
-    Object[] toValuesWithID();
+    List<Object> toValues();
 
     T applyChanges(T other);
 }

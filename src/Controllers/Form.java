@@ -1,5 +1,6 @@
 package Controllers;
 
+import Models.Record.ValidationError;
 import Models.Record;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -54,12 +55,16 @@ public abstract class Form<T extends Record> extends Base implements Initializab
 
     @FXML
     private void handleSave() {
-        validateRecord();
-        callCallback(record);
-        handleClose();
+        try {
+            validateRecord();
+            callCallback(record);
+            handleClose();
+        } catch (ValidationError err) {
+            displayError(err);
+        }
     }
 
-    protected abstract void validateRecord();
+    abstract protected void validateRecord() throws ValidationError;
 
     /**
      * called when the cancel button is clicked or any time the form must be closed
@@ -75,11 +80,16 @@ public abstract class Form<T extends Record> extends Base implements Initializab
     }
 
     protected abstract void setFields();
+
     protected abstract String getResourceURL();
 
     private String getWindowTitle() {
         return windowTitle;
     }
+
+    protected abstract double getWidth();
+
+    protected abstract double getHeight();
 
     /**
      * Opens a new window with the correct form for the controller
@@ -88,7 +98,7 @@ public abstract class Form<T extends Record> extends Base implements Initializab
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(getResourceURL()), bundle);
             loader.setController(this);
-            Scene scene = new Scene(loader.load(), 800, 600);
+            Scene scene = new Scene(loader.load(), getWidth(), getHeight());
             stage = new Stage();
             stage.setOnHidden(ev -> handleClose(null));
             stage.setScene(scene);
