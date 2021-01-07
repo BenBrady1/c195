@@ -3,7 +3,7 @@ package Models;
 public abstract class Record {
     protected long id;
 
-    public Record(int id) {
+    public Record(long id) {
         this.id = id;
     }
 

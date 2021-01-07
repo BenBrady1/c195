@@ -1,13 +1,13 @@
 package Models;
 
-public final class Customer extends Record {
+public final class Customer extends Record implements Model<Customer> {
     private String name;
     private String address;
     private String postalCode;
     private String phone;
     private long divisionId;
 
-    public Customer(int id, String name, String address, String postalCode, String phone, int divisionId) {
+    public Customer(long id, String name, String address, String postalCode, String phone, long divisionId) {
         super(id);
         this.name = name;
         this.address = address;
@@ -56,7 +56,28 @@ public final class Customer extends Record {
         this.divisionId = divisionId;
     }
 
+    @Override
     public Object[] toValues() {
         return new Object[]{name, address, postalCode, phone, divisionId};
+    }
+
+    @Override
+    public Customer copy() {
+        return new Customer(id, name, address, postalCode, phone, divisionId);
+    }
+
+    @Override
+    public Customer applyChanges(Customer other) {
+        this.name = other.name;
+        this.address = other.address;
+        this.postalCode = other.postalCode;
+        this.phone = other.phone;
+        this.divisionId = other.divisionId;
+        return this;
+    }
+
+    @Override
+    public Object[] toValuesWithID() {
+        return new Object[]{name, address, postalCode, phone, divisionId, id};
     }
 }

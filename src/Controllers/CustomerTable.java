@@ -13,6 +13,13 @@ import java.util.*;
 public final class CustomerTable extends Table<Customer> {
     private final HashMap<Long, Division> divisionMap = new HashMap();
     private final List<Country> countries = new ArrayList();
+    private final String insertStatement = "INSERT INTO customers " +
+            "(Customer_Name, Address, Postal_Code, Phone, Division_ID) " +
+            "VALUES (?, ?, ?, ?, ?)";
+    private final String updateStatement = "UPDATE customers " +
+            "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ? " +
+            "WHERE Customer_ID = ?";
+    private final String deleteStatement = "DELETE FROM customers WHERE Customer_ID = ?";
 
     public CustomerTable(Optional<Integer> userId) {
         super(userId, new CustomerFormFactory());
@@ -102,33 +109,8 @@ public final class CustomerTable extends Table<Customer> {
     }
 
     @Override
-    protected void addToDatabase(Customer record) {
-        executeInsert("INSERT INTO customers " +
-                "(Customer_Name, Address, Postal_Code, Phone, Division_ID) " +
-                "VALUES (?, ?, ?, ?, ?)", record.toValues(), (ex, newId) -> {
-            if (ex != null) printSQLException(ex);
-            if (newId != null) record.setId(newId);
-        });
-    }
-
-    @Override
     protected Customer getNewRecord() {
         return new Customer(0, "", "", "", "", 0);
-    }
-
-    @Override
-    protected void updateInDatabase(Customer record) {
-//        executeQuery()
-    }
-
-    @Override
-    protected void deleteFromDatabase(Customer record) {
-        executeUpdate("DELETE FROM customers WHERE Customer_ID = ?",
-                new Object[]{record.getId()},
-                (ex, updates) -> {
-                    if (ex != null) printSQLException(ex);
-                    if (updates == 1) record.setId(0);
-                });
     }
 
     private void consumeResultSet(ResultSet rs) {
@@ -146,5 +128,20 @@ public final class CustomerTable extends Table<Customer> {
         } catch (SQLException ex) {
             printSQLException(ex);
         }
+    }
+
+    @Override
+    public String getInsertStatement() {
+        return insertStatement;
+    }
+
+    @Override
+    public String getUpdateStatement() {
+        return updateStatement;
+    }
+
+    @Override
+    public String getDeleteStatement() {
+        return deleteStatement;
     }
 }

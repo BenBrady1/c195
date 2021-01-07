@@ -1,7 +1,7 @@
 package Controllers;
 
+import Models.Model;
 import Models.Record;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-public abstract class Table<T extends Record> extends Base implements Initializable {
+public abstract class Table<T extends Record & Model<T>> extends Base implements Initializable {
     @FXML
     protected TableView<T> tableView;
 
@@ -50,7 +50,14 @@ public abstract class Table<T extends Record> extends Base implements Initializa
         formController = null;
     }
 
-    protected abstract void addToDatabase(T record);
+    private void addToDatabase(T record) {
+        executeInsert(getInsertStatement(), record.toValues(), (ex, newId) -> {
+            if (ex != null) printSQLException(ex);
+            if (newId != null) record.setId(newId);
+        });
+    }
+
+    protected abstract String getInsertStatement();
 
     protected abstract T getNewRecord();
 
@@ -84,11 +91,18 @@ public abstract class Table<T extends Record> extends Base implements Initializa
         }
     }
 
-    protected abstract void updateInDatabase(T record);
+    protected void updateInDatabase(T record) {
+        executeUpdate(getUpdateStatement(), record.toValuesWithID(), (ex, updateCount) -> {
+            if (ex != null) printSQLException(ex);
+            if (updateCount == 1) getSelectedRecord().applyChanges(record);
+        });
+    }
+
+    protected abstract String getUpdateStatement();
 
     @FXML
     private void editRecord() {
-        T selected = getSelectedRecord();
+        T selected = getSelectedRecord().copy();
         if (selected != null && formController == null) {
             System.out.println("edit record called");
             openForm(FormFactory.Type.Update, selected, Form.Mode.Update, (updatedRecord) -> {
@@ -98,7 +112,14 @@ public abstract class Table<T extends Record> extends Base implements Initializa
         }
     }
 
-    protected abstract void deleteFromDatabase(T record);
+    protected void deleteFromDatabase(T record) {
+        executeUpdate(getDeleteStatement(), new Object[]{record.getId()}, (ex, updates) -> {
+            if (ex != null) printSQLException(ex);
+            if (updates == 1) record.setId(0);
+        });
+    }
+
+    protected abstract String getDeleteStatement();
 
     @FXML
     private void deleteRecord() {

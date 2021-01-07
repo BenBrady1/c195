@@ -86,7 +86,7 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
         divisionMap.forEach((key, division) -> {
             if (division.getCountryId() == country.getId()) divisions.add(division);
         });
-        divisionComboBox.setDisable(divisionComboBox.getItems().isEmpty());
+        divisionComboBox.setDisable(readOnly || divisionComboBox.getItems().isEmpty());
         divisions.sort(Comparator.comparing(Division::getDivision));
     }
 
