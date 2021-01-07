@@ -5,6 +5,7 @@ import Models.Record;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
@@ -131,6 +132,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
             if (recordToDelete.getId() == 0) {
                 tableView.getItems().remove(recordToDelete);
                 tableView.refresh();
+                displayAlert("Record deleted", "The record was successfully deleted", Alert.AlertType.INFORMATION);
             }
         }
     }

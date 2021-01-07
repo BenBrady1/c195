@@ -142,9 +142,7 @@ abstract public class Base {
      * @param handler   a function to handle any errors or result sets from the query, its return value will be returned
      *                  from this function
      */
-    protected <T> T executeQuery(String query,
-                                 Object[] arguments,
-                                 BiFunction<SQLException, ResultSet, T> handler) {
+    protected <T> T executeQuery(String query, Object[] arguments, BiFunction<SQLException, ResultSet, T> handler) {
         try (var stmt = createDatabaseConnection().prepareStatement(query)) {
             if (arguments != null) {
                 for (int i = 0; i < arguments.length; i++) {
@@ -161,9 +159,7 @@ abstract public class Base {
         }
     }
 
-    protected void executeInsert(String query,
-                                 List<Object> arguments,
-                                 BiConsumer<SQLException, Long> handler) {
+    protected void executeInsert(String query, List<Object> arguments, BiConsumer<SQLException, Long> handler) {
         try (
                 Connection connection = createDatabaseConnection();
                 PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
@@ -189,9 +185,7 @@ abstract public class Base {
         }
     }
 
-    protected void executeUpdate(String query,
-                                 List<Object> arguments,
-                                 BiConsumer<SQLException, Integer> handler) {
+    protected void executeUpdate(String query, List<Object> arguments, BiConsumer<SQLException, Integer> handler) {
         try (
                 Connection connection = createDatabaseConnection();
                 PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
@@ -235,13 +229,25 @@ abstract public class Base {
     }
 
     /**
-     * Used to display validation errors to the end user.
+     * A wrapper around Base#displayAlert(String, String, Alert.AlertType) to display errors to the end user.
      *
      * @param title   the title for the error message alert
      * @param message the error message to be displayed
+     * @see Base#displayAlert(String, String, Alert.AlertType)
      */
     protected void displayError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+        displayAlert(title, message, Alert.AlertType.ERROR);
+    }
+
+    /**
+     * A function to display an alert that blocks the rest of the program.
+     *
+     * @param title   the title for the error message alert
+     * @param message the error message to be displayed
+     * @param type    the type of alert to display
+     */
+    protected void displayAlert(String title, String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

@@ -5,6 +5,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 
@@ -27,6 +29,8 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
     private ComboBox<Division> divisionComboBox;
     @FXML
     private ComboBox<Country> countryComboBox;
+    @FXML
+    private ButtonBar buttonBar;
 
     private List<Country> countries;
     private final Map<Long, Division> divisionMap;
@@ -55,6 +59,9 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
 
     @Override
     protected void setFields() {
+        if (mode == Mode.Read) {
+            buttonBar.setVisible(false);
+        }
         idField.setText(Long.toString(record.getId()));
         nameField.setText(record.getName());
         nameField.setDisable(readOnly);
