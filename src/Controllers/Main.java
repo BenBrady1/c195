@@ -8,7 +8,6 @@ import javafx.scene.control.TabPane;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class Main extends Base implements Initializable {

@@ -16,8 +16,8 @@ import java.util.function.BiFunction;
  * an abstract base controller class with helper methods that can be used across controllers
  */
 abstract public class Base {
-    private static final Locale coercedLocale = coerceLocale();
-    protected final static ResourceBundle bundle = ResourceBundle.getBundle("App", getLocale());
+    private static Locale coercedLocale = coerceLocale();
+    protected static ResourceBundle bundle;
     protected static Connection conn;
     protected static Optional<Long> userId = Optional.ofNullable(null);
 
@@ -44,6 +44,19 @@ abstract public class Base {
      */
     public static Locale getLocale() {
         return coercedLocale;
+    }
+
+    public static ResourceBundle getBundle() {
+        return bundle;
+    }
+
+    public static void setLocaleAndBundle() {
+        coercedLocale = coerceLocale();
+        bundle = ResourceBundle.getBundle("App", getLocale());
+    }
+
+    protected static long getUserId() {
+        return userId.orElse(null);
     }
 
     protected View viewController;
@@ -186,6 +199,13 @@ abstract public class Base {
     }
 
     protected void executeUpdate(String query, List<Object> arguments, BiConsumer<SQLException, Integer> handler) {
+        executeUpdate(query, arguments, ((BiFunction<SQLException, Integer, Void>) (ex, updates) -> {
+            handler.accept(ex, updates);
+            return null;
+        }));
+    }
+
+    protected <T> T executeUpdate(String query, List<Object> arguments, BiFunction<SQLException, Integer, T> handler) {
         try (
                 Connection connection = createDatabaseConnection();
                 PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
@@ -197,10 +217,10 @@ abstract public class Base {
             }
 
             int affectedRows = stmt.executeUpdate();
-            handler.accept(null, affectedRows);
+            return handler.apply(null, affectedRows);
         } catch (SQLException ex) {
             printSQLException(ex);
-            handler.accept(ex, null);
+            return handler.apply(ex, null);
         }
     }
 
@@ -223,9 +243,10 @@ abstract public class Base {
      * A wrapper around Base#displayError(String, String) with a default title
      *
      * @param ex the error holding the message to display
+     * @see Base#displayError(String, String)
      */
     protected void displayError(Exception ex) {
-        displayError("Error!", ex.getMessage());
+        displayError(bundle.getString("error.defaultTitle"), ex.getMessage());
     }
 
     /**

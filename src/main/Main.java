@@ -1,6 +1,8 @@
 package main;
 
+import Controllers.Base;
 import Controllers.View;
+import Models.Record;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -10,6 +12,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        Base.setLocaleAndBundle();
+        Record.bundle = Base.getBundle();
         final Scene scene = new Scene(new StackPane());
 
         View viewController = new View(scene, primaryStage);

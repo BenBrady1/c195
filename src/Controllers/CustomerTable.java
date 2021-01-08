@@ -17,7 +17,7 @@ public final class CustomerTable extends Table<Customer> {
             "(Customer_Name, Address, Postal_Code, Phone, Division_ID, Created_By, Last_Updated_By) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?)";
     private final String updateStatement = "UPDATE customers " +
-            "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ?, Last_Updated_By = ?, Last_Update = NOW() " +
+            "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ?, Last_Updated_By = ?, Last_Update =  " +
             "WHERE Customer_ID = ?";
     private final String deleteStatement = "DELETE FROM customers WHERE Customer_ID = ?";
 
@@ -143,5 +143,10 @@ public final class CustomerTable extends Table<Customer> {
     @Override
     public String getDeleteStatement() {
         return deleteStatement;
+    }
+
+    @Override
+    protected boolean deleteDependencies(Customer record) {
+        return executeUpdate("DELETE FROM appointments WHERE Customer_ID = ?", toArray(record.getId()), (ex, updates) -> ex == null);
     }
 }

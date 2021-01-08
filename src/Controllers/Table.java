@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
@@ -19,6 +20,8 @@ import java.util.function.Consumer;
 public abstract class Table<T extends Record & Model<T>> extends Base implements Initializable {
     @FXML
     protected TableView<T> tableView;
+    @FXML
+    private Button deleteButton;
 
     protected abstract void addColumns();
 
@@ -52,7 +55,10 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     private void addToDatabase(T record) {
-        executeInsert(getInsertStatement(), record.toValues(), (ex, newId) -> {
+        List<Object> arguments = record.toValues();
+        arguments.add(getUserId());
+        arguments.add(getUserId());
+        executeInsert(getInsertStatement(), arguments, (ex, newId) -> {
             if (ex != null) printSQLException(ex);
             if (newId != null) record.setId(newId);
         });
@@ -65,7 +71,6 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     @FXML
     private void addRecord() {
         if (formController == null) {
-            System.out.println("add record called");
             openForm(FormFactory.Type.Create, getNewRecord(), Form.Mode.Create, (newRecord) -> {
                 if (newRecord != null) {
                     addToDatabase(newRecord);
@@ -92,7 +97,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     protected void updateInDatabase(T record) {
         List<Object> arguments = record.toValues();
-        arguments.add(userId.orElse(null));
+        arguments.add(getUserId());
         arguments.add(record.getId());
         executeUpdate(getUpdateStatement(), arguments, (ex, updateCount) -> {
             if (ex != null) printSQLException(ex);
@@ -106,7 +111,6 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     private void editRecord() {
         T selected = getSelectedRecord();
         if (selected != null && formController == null) {
-            System.out.println("edit record called");
             openForm(FormFactory.Type.Update, selected.copy(), Form.Mode.Update, (updatedRecord) -> {
                 if (updatedRecord != null) updateInDatabase(updatedRecord);
                 finalizeAction();
@@ -114,26 +118,47 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         }
     }
 
-    protected void deleteFromDatabase(T record) {
-        executeUpdate(getDeleteStatement(), new ArrayList<>(List.of(record.getId())), (ex, updates) -> {
-            if (ex != null) printSQLException(ex);
-            if (updates == 1) record.setId(0);
-        });
+    protected List<Object> toArray(Object... values) {
+        List<Object> output = new ArrayList();
+        if (values != null) {
+            for (Object value : values) {
+                output.add(value);
+            }
+        } else {
+            output.add(null);
+        }
+
+        return output;
     }
+
+    protected void deleteFromDatabase(T record) {
+
+        System.out.println("Deleting record");
+        if (deleteDependencies(record)) {
+            System.out.println("Dependencies deleted");
+            executeUpdate(getDeleteStatement(), toArray(record.getId()), (ex, updates) -> {
+                if (ex != null) printSQLException(ex);
+                if (updates == 1) record.setId(0);
+            });
+        }
+    }
+
+    protected abstract boolean deleteDependencies(T record);
 
     protected abstract String getDeleteStatement();
 
     @FXML
     private void deleteRecord() {
-        System.out.println("delete record called");
         T recordToDelete = getSelectedRecord();
         if (recordToDelete != null) {
+            deleteButton.setDisable(true);
             deleteFromDatabase(recordToDelete);
             if (recordToDelete.getId() == 0) {
                 tableView.getItems().remove(recordToDelete);
                 tableView.refresh();
-                displayAlert("Record deleted", "The record was successfully deleted", Alert.AlertType.INFORMATION);
+                displayAlert(bundle.getString("record.deleted.title"), bundle.getString("record.deleted.message"), Alert.AlertType.INFORMATION);
             }
+            deleteButton.setDisable(false);
         }
     }
 }
