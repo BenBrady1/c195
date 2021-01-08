@@ -19,6 +19,7 @@ public class Main extends Base implements Initializable {
     Tab appointmentTab;
 
     private boolean customerTabInitialized = false;
+    private boolean appointmentTabInitialized = false;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -52,6 +53,16 @@ public class Main extends Base implements Initializable {
     }
 
     private void populateAppointmentData() {
+        if (appointmentTabInitialized) return;
+        appointmentTabInitialized = true;
         System.out.println("Fetching appointment data");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Table.fxml"), bundle);
+        loader.setController(new AppointmentTable());
+        try {
+            appointmentTab.setContent(loader.load());
+        } catch (IOException ex) {
+            System.out.println(ex);
+            ex.printStackTrace();
+        }
     }
 }

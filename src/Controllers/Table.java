@@ -3,6 +3,7 @@ package Controllers;
 import Models.Model;
 import Models.Record;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -10,11 +11,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
+import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class Table<T extends Record & Model<T>> extends Base implements Initializable {
@@ -24,6 +23,29 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     private Button deleteButton;
 
     protected abstract void addColumns();
+
+    protected TableColumn<T, String> getStringColumn(Class<T> tClass, String fieldName) {
+        try {
+            final Field field = tClass.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            final String key = String.format("%s.%s", tClass.getSimpleName().toLowerCase(), field.getName());
+            final TableColumn<T, String> column = new TableColumn(bundle.getString(key));
+            column.setCellValueFactory(param -> {
+                try {
+                    return new SimpleStringProperty((String) field.get(param.getValue()));
+                } catch (IllegalAccessException e) {
+                    System.out.println("here");
+                    e.printStackTrace();
+                }
+                return null;
+            });
+            return column;
+        } catch (NoSuchFieldException ex) {
+            System.out.println(ex);
+        }
+
+        return null;
+    }
 
     protected abstract void populateData();
 
@@ -156,9 +178,11 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
             if (recordToDelete.getId() == 0) {
                 tableView.getItems().remove(recordToDelete);
                 tableView.refresh();
-                displayAlert(bundle.getString("record.deleted.title"), bundle.getString("record.deleted.message"), Alert.AlertType.INFORMATION);
+                displayAlert(bundle.getString("record.deleted.title"), getDeletedMessage(), Alert.AlertType.INFORMATION);
             }
             deleteButton.setDisable(false);
         }
     }
+
+    protected abstract String getDeletedMessage();
 }

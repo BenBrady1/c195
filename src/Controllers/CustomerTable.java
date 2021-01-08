@@ -37,14 +37,10 @@ public final class CustomerTable extends Table<Customer> {
 
     @Override
     protected final void addColumns() {
-        final TableColumn<Customer, String> nameColumn = new TableColumn(bundle.getString("customer.name"));
-        nameColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getName()));
-        final TableColumn<Customer, String> addressColumn = new TableColumn(bundle.getString("customer.address"));
-        addressColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getAddress()));
-        final TableColumn<Customer, String> postalCodeColumn = new TableColumn(bundle.getString("customer.postalCode"));
-        postalCodeColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getPostalCode()));
-        final TableColumn<Customer, String> phoneColumn = new TableColumn(bundle.getString("customer.phone"));
-        phoneColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getPhone()));
+        final TableColumn<Customer, String> nameColumn = getStringColumn(Customer.class, "name");
+        final TableColumn<Customer, String> addressColumn = getStringColumn(Customer.class, "address");
+        final TableColumn<Customer, String> postalCodeColumn = getStringColumn(Customer.class, "postalCode");
+        final TableColumn<Customer, String> phoneColumn = getStringColumn(Customer.class, "phone");
         final TableColumn<Customer, String> divisionColumn = new TableColumn(bundle.getString("customer.division"));
         divisionColumn.setCellValueFactory(param -> {
             final Division division = divisionMap.get(param.getValue().getDivisionId());
@@ -148,5 +144,10 @@ public final class CustomerTable extends Table<Customer> {
     @Override
     protected boolean deleteDependencies(Customer record) {
         return executeUpdate("DELETE FROM appointments WHERE Customer_ID = ?", toArray(record.getId()), (ex, updates) -> ex == null);
+    }
+
+    @Override
+    protected String getDeletedMessage() {
+        return bundle.getString("record.deleted.message");
     }
 }
