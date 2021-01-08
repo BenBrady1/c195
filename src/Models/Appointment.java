@@ -2,6 +2,8 @@ package Models;
 
 import java.text.DateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Appointment extends Record implements Model<Appointment> {
@@ -44,12 +46,7 @@ public class Appointment extends Record implements Model<Appointment> {
 
     @Override
     public List<Object> toValues() {
-        return null;
-    }
-
-    @Override
-    public Appointment applyChanges(Appointment other) {
-        return null;
+        return new ArrayList(List.of(title, description, location, type, start, end, customerId, userId, contactId));
     }
 
     public String getTitle() {
@@ -57,7 +54,7 @@ public class Appointment extends Record implements Model<Appointment> {
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.title = title.trim();
     }
 
     public String getDescription() {
@@ -65,7 +62,7 @@ public class Appointment extends Record implements Model<Appointment> {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = description.trim();
     }
 
     public String getLocation() {
@@ -73,7 +70,7 @@ public class Appointment extends Record implements Model<Appointment> {
     }
 
     public void setLocation(String location) {
-        this.location = location;
+        this.location = location.trim();
     }
 
     public String getType() {
@@ -81,7 +78,7 @@ public class Appointment extends Record implements Model<Appointment> {
     }
 
     public void setType(String type) {
-        this.type = type;
+        this.type = type.trim();
     }
 
     public LocalDateTime getStart() {
@@ -133,7 +130,9 @@ public class Appointment extends Record implements Model<Appointment> {
     }
 
     private String formatDate(LocalDateTime date) {
-        DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
-        return formatter.format(date);
+//        final DateFormat formatter = DateTimeFormatter.
+//        System.out.println(date);
+//        return formatter.format(date);
+        return date.toString();
     }
 }

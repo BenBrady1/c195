@@ -1,5 +1,6 @@
 package Models;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 public interface Model<T> {
@@ -7,5 +8,15 @@ public interface Model<T> {
 
     List<Object> toValues();
 
-    T applyChanges(T other);
+    default T applyChanges(T other) {
+        for (Field declaredField : getClass().getDeclaredFields()) {
+            declaredField.setAccessible(true);
+            try {
+                declaredField.set(this, declaredField.get(other));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return (T) this;
+    }
 }

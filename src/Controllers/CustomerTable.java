@@ -12,27 +12,19 @@ import java.util.*;
 
 public final class CustomerTable extends Table<Customer> {
     private final HashMap<Long, Division> divisionMap = new HashMap();
-    private final List<Country> countries = new ArrayList();
+    private final HashMap<Long, Country> countryMap = new HashMap();
     private final String insertStatement = "INSERT INTO customers " +
             "(Customer_Name, Address, Postal_Code, Phone, Division_ID, Created_By, Last_Updated_By) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?)";
     private final String updateStatement = "UPDATE customers " +
-            "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ?, Last_Updated_By = ?, Last_Update =  " +
+            "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ?, Last_Updated_By = ?, Last_Update = NOW() " +
             "WHERE Customer_ID = ?";
     private final String deleteStatement = "DELETE FROM customers WHERE Customer_ID = ?";
 
     public CustomerTable() {
         super(new CustomerFormFactory());
         ((CustomerFormFactory) formFactory).setDivisionMap(Collections.unmodifiableMap(divisionMap));
-        ((CustomerFormFactory) formFactory).setCountries(Collections.unmodifiableList(countries));
-    }
-
-    private String getCountry(long id) {
-        for (Country country : countries) {
-            if (country.getId() == id) return country.getCountry();
-        }
-
-        return null;
+        ((CustomerFormFactory) formFactory).setCountryMap(Collections.unmodifiableMap(countryMap));
     }
 
     @Override
@@ -49,7 +41,7 @@ public final class CustomerTable extends Table<Customer> {
         final TableColumn<Customer, String> countryColumn = new TableColumn(bundle.getString("customer.country"));
         countryColumn.setCellValueFactory(param -> {
             final Division division = divisionMap.get(param.getValue().getDivisionId());
-            return new SimpleStringProperty(getCountry(division.getCountryId()));
+            return new SimpleStringProperty(countryMap.get(division.getCountryId()).getCountry());
         });
         tableView.getColumns().addAll(nameColumn, addressColumn, postalCodeColumn, phoneColumn, divisionColumn, countryColumn);
     }
@@ -97,7 +89,7 @@ public final class CustomerTable extends Table<Customer> {
         try {
             while (rs.next()) {
                 final Country country = new Country(rs.getInt(1), rs.getString(2));
-                countries.add(country);
+                countryMap.put(country.getId(), country);
             }
         } catch (SQLException ex) {
             printSQLException(ex);

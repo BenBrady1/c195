@@ -1,18 +1,19 @@
 package Controllers;
 
-import Models.*;
+import Models.Country;
+import Models.Customer;
+import Models.Division;
+import Models.Record;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public final class CustomerForm extends Form<Customer> implements Initializable {
     @FXML
@@ -32,26 +33,25 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
     @FXML
     private ButtonBar buttonBar;
 
-    private List<Country> countries;
+    private Map<Long, Country> countryMap;
     private final Map<Long, Division> divisionMap;
 
-    public CustomerForm(String windowTitle, Map<Long, Division> divisionMap, List<Country> countries) {
+    public CustomerForm(String windowTitle, Map<Long, Division> divisionMap, Map<Long, Country> countryMap) {
         super(windowTitle);
         this.divisionMap = divisionMap;
-        this.countries = countries;
+        this.countryMap = countryMap;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        List<Long> countriesWithDivisions = new ArrayList<>();
+        ObservableList<Country> countries = countryComboBox.getItems();
         divisionMap.forEach((id, division) -> {
-            if (!countriesWithDivisions.contains(division.getCountryId())) {
-                countriesWithDivisions.add(division.getCountryId());
+            Country country = countryMap.get(division.getCountryId());
+            if (!countries.contains(country)) {
+                countries.add(country);
             }
         });
-        countryComboBox.getItems()
-                .addAll(countries.stream().filter(country -> countriesWithDivisions.contains(country.getId()))
-                        .collect(Collectors.toList()));
+        countries.sort(Comparator.comparing(Country::getCountry));
         idField.setDisable(true);
         divisionComboBox.setDisable(true);
         super.initialize(url, resourceBundle);
@@ -72,7 +72,7 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
         phoneField.setText(record.getPhone());
         phoneField.setDisable(readOnly);
         final Division division = divisionMap.get(record.getDivisionId());
-        countryComboBox.getSelectionModel().select(findCountry(division.getCountryId()));
+        countryComboBox.getSelectionModel().select(countryMap.get(division.getCountryId()));
         countryComboBox.setDisable(readOnly);
         populateDivisions(null);
         divisionComboBox.getSelectionModel().select(division);
@@ -106,14 +106,6 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
                 .orElse(0L);
         record.setDivisionId(divisionId);
         record.validate();
-    }
-
-    private Country findCountry(long countryId) {
-        for (Country country : countries) {
-            if (country.getId() == countryId) return country;
-        }
-
-        return null;
     }
 
     @Override
