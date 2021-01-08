@@ -1,10 +1,12 @@
 package Models;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public abstract class Record {
     public static ResourceBundle bundle;
+    public static Locale locale;
 
     public class ValidationError extends Exception {
         public ValidationError(String message) {

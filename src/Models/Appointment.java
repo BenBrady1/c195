@@ -1,5 +1,6 @@
 package Models;
 
+import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +16,6 @@ public class Appointment extends Record implements Model<Appointment> {
     private long contactId;
 
     public Appointment(long id,
-                       String appointmentID,
                        String title,
                        String description,
                        String location,
@@ -122,5 +122,18 @@ public class Appointment extends Record implements Model<Appointment> {
 
     public void setContactId(long contactId) {
         this.contactId = contactId;
+    }
+
+    public String getFormattedStart() {
+        return formatDate(start);
+    }
+
+    public String getFormattedEnd() {
+        return formatDate(end);
+    }
+
+    private String formatDate(LocalDateTime date) {
+        DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+        return formatter.format(date);
     }
 }
