@@ -68,4 +68,9 @@ public final class Customer extends Record implements Model<Customer> {
     public Customer copy() {
         return new Customer(id, name, address, postalCode, phone, divisionId);
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

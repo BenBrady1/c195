@@ -120,7 +120,7 @@ abstract public class Base {
      *
      * @param query   the query to execute
      * @param handler a function to handle any errors or result sets from the query
-     * @see Base#executeQuery(String, Object[], BiFunction)
+     * @see Base#executeQuery(String, List, BiFunction)
      */
     protected void executeQuery(String query, BiConsumer<SQLException, ResultSet> handler) {
         executeQuery(query, null, (ex, rs) -> {
@@ -136,9 +136,9 @@ abstract public class Base {
      * @param query     the query to execute
      * @param arguments an array of arguments
      * @param handler   a function to handle any errors or result sets from the query
-     * @see Base#executeQuery(String, Object[], BiFunction)
+     * @see Base#executeQuery(String, List, BiFunction)
      */
-    protected void executeQuery(String query, Object[] arguments, BiConsumer<SQLException, ResultSet> handler) {
+    protected void executeQuery(String query, List<Object> arguments, BiConsumer<SQLException, ResultSet> handler) {
         executeQuery(query, arguments, (ex, rs) -> {
             handler.accept(ex, rs);
             return null;
@@ -155,13 +155,9 @@ abstract public class Base {
      * @param handler   a function to handle any errors or result sets from the query, its return value will be returned
      *                  from this function
      */
-    protected <T> T executeQuery(String query, Object[] arguments, BiFunction<SQLException, ResultSet, T> handler) {
+    protected <T> T executeQuery(String query, List<Object> arguments, BiFunction<SQLException, ResultSet, T> handler) {
         try (var stmt = createDatabaseConnection().prepareStatement(query)) {
-            if (arguments != null) {
-                for (int i = 0; i < arguments.length; i++) {
-                    stmt.setObject(i + 1, arguments[i]);
-                }
-            }
+            setArguments(stmt, arguments);
 
             try (var rs = stmt.executeQuery()) {
                 return handler.apply(null, rs);
@@ -177,12 +173,7 @@ abstract public class Base {
                 Connection connection = createDatabaseConnection();
                 PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            if (arguments != null) {
-                for (int i = 0; i < arguments.size(); i++) {
-                    stmt.setObject(i + 1, arguments.get(i));
-                }
-            }
-
+            setArguments(stmt, arguments);
             stmt.executeUpdate();
 
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -210,17 +201,21 @@ abstract public class Base {
                 Connection connection = createDatabaseConnection();
                 PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            if (arguments != null) {
-                for (int i = 0; i < arguments.size(); i++) {
-                    stmt.setObject(i + 1, arguments.get(i));
-                }
-            }
+            setArguments(stmt, arguments);
 
             int affectedRows = stmt.executeUpdate();
             return handler.apply(null, affectedRows);
         } catch (SQLException ex) {
             printSQLException(ex);
             return handler.apply(ex, null);
+        }
+    }
+
+    private void setArguments(PreparedStatement stmt, List<Object> arguments) throws SQLException {
+        if (arguments != null) {
+            for (int i = 0; i < arguments.size(); i++) {
+                stmt.setObject(i + 1, arguments.get(i));
+            }
         }
     }
 
@@ -246,7 +241,7 @@ abstract public class Base {
      * @see Base#displayError(String, String)
      */
     protected void displayError(Exception ex) {
-        displayError(bundle.getString("error.defaultTitle"), ex.getMessage());
+        displayError(getBundleString("error.defaultTitle"), ex.getMessage());
     }
 
     /**
@@ -273,5 +268,15 @@ abstract public class Base {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    protected String getBundleString(String key) {
+        try {
+            return bundle.getString(key);
+        } catch (Exception ex) {
+            System.out.println(String.format("Key not found: %s", key));
+            System.out.println(ex);
+            return "FIX ME";
+        }
     }
 }

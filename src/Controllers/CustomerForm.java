@@ -8,16 +8,16 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 public final class CustomerForm extends Form<Customer> implements Initializable {
-    @FXML
-    private TextField idField;
     @FXML
     private TextField nameField;
     @FXML
@@ -30,10 +30,8 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
     private ComboBox<Division> divisionComboBox;
     @FXML
     private ComboBox<Country> countryComboBox;
-    @FXML
-    private ButtonBar buttonBar;
 
-    private Map<Long, Country> countryMap;
+    private final Map<Long, Country> countryMap;
     private final Map<Long, Division> divisionMap;
 
     public CustomerForm(String windowTitle, Map<Long, Division> divisionMap, Map<Long, Country> countryMap) {
@@ -52,25 +50,12 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
             }
         });
         countries.sort(Comparator.comparing(Country::getCountry));
-        idField.setDisable(true);
         divisionComboBox.setDisable(true);
         super.initialize(url, resourceBundle);
     }
 
     @Override
     protected void setFields() {
-        if (mode == Mode.Read) {
-            buttonBar.setVisible(false);
-        }
-        idField.setText(Long.toString(record.getId()));
-        nameField.setText(record.getName());
-        nameField.setDisable(readOnly);
-        addressField.setText(record.getAddress());
-        addressField.setDisable(readOnly);
-        postalCodeField.setText(record.getPostalCode());
-        postalCodeField.setDisable(readOnly);
-        phoneField.setText(record.getPhone());
-        phoneField.setDisable(readOnly);
         final Division division = divisionMap.get(record.getDivisionId());
         countryComboBox.getSelectionModel().select(countryMap.get(division.getCountryId()));
         countryComboBox.setDisable(readOnly);
@@ -85,9 +70,9 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
 
     @FXML
     private void populateDivisions(ActionEvent event) {
-        final Country country = countryComboBox.getSelectionModel().getSelectedItem();
+        final Country country = countryComboBox.getValue();
         final ObservableList<Division> divisions = divisionComboBox.getItems();
-        divisions.removeAll(divisions);
+        divisions.clear();
         divisionMap.forEach((key, division) -> {
             if (division.getCountryId() == country.getId()) divisions.add(division);
         });
@@ -96,16 +81,8 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
     }
 
     @Override
-    protected void validateRecord() throws Record.ValidationError {
-        record.setName(nameField.getText().trim());
-        record.setAddress(addressField.getText().trim());
-        record.setPostalCode(postalCodeField.getText().trim());
-        record.setPhone(phoneField.getText().trim());
-        long divisionId = Optional.ofNullable(divisionComboBox.getSelectionModel().getSelectedItem())
-                .map(Division::getId)
-                .orElse(0L);
-        record.setDivisionId(divisionId);
-        record.validate();
+    protected void applyOtherFieldsToRecord() {
+        record.setDivisionId(getRecordId(divisionComboBox.getValue()));
     }
 
     @Override

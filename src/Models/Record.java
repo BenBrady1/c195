@@ -1,8 +1,12 @@
 package Models;
 
 import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public abstract class Record {
     public static ResourceBundle bundle;
@@ -39,24 +43,35 @@ public abstract class Record {
     }
 
     public void validate() throws ValidationError {
-        for (Field declaredField : getClass().getDeclaredFields()) {
+        for (final Field declaredField : getRequiredFields()) {
             try {
                 declaredField.setAccessible(true);
-                Object value = declaredField.get(this);
+                final Object value = declaredField.get(this);
                 if (value instanceof String) {
                     if (((String) value).length() == 0) {
                         throw new ValidationError(getErrorMessage(declaredField.getName(), "empty"));
                     }
                 } else if (value instanceof Long) {
+                    System.out.println(declaredField.getName());
                     if ((Long) value == 0) {
                         throw new ValidationError(getErrorMessage(declaredField.getName(), "empty"));
                     }
+                } else if (value instanceof OffsetDateTime) {
+                    validateDateField(declaredField.getName());
                 } else {
-                    throw new RuntimeException("unreachable");
+                    throw new ValidationError("unreachable");
                 }
             } catch (IllegalAccessException ex) {
                 System.out.println(ex);
             }
         }
+    }
+
+    protected void validateDateField(String name) throws ValidationError {
+        throw new ValidationError("unreachable");
+    }
+
+    protected List<Field> getRequiredFields() {
+        return Arrays.stream(getClass().getDeclaredFields()).collect(Collectors.toList());
     }
 }

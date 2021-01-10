@@ -17,4 +17,9 @@ public class Contact extends Record {
     public String getEmail() {
         return email;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

@@ -21,6 +21,8 @@ public class Main extends Base implements Initializable {
     private boolean customerTabInitialized = false;
     private boolean appointmentTabInitialized = false;
 
+    private CustomerTable customerTableController;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // lambda to easily determine which tab has been selected and display the correct data
@@ -43,7 +45,8 @@ public class Main extends Base implements Initializable {
         customerTabInitialized = true;
         System.out.println("Fetching customer data");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Table.fxml"), bundle);
-        loader.setController(new CustomerTable());
+        customerTableController = new CustomerTable();
+        loader.setController(customerTableController);
         try {
             customerTab.setContent(loader.load());
         } catch (IOException ex) {
@@ -57,7 +60,7 @@ public class Main extends Base implements Initializable {
         appointmentTabInitialized = true;
         System.out.println("Fetching appointment data");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Table.fxml"), bundle);
-        loader.setController(new AppointmentTable());
+        loader.setController(new AppointmentTable(customerTableController.getData()));
         try {
             appointmentTab.setContent(loader.load());
         } catch (IOException ex) {

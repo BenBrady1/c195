@@ -1,18 +1,23 @@
 package Models;
 
-import java.text.DateFormat;
-import java.time.LocalDateTime;
+import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Appointment extends Record implements Model<Appointment> {
     private String title;
     private String description;
     private String location;
     private String type;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private OffsetDateTime start;
+    private OffsetDateTime end;
     private long customerId;
     private long userId;
     private long contactId;
@@ -22,8 +27,8 @@ public class Appointment extends Record implements Model<Appointment> {
                        String description,
                        String location,
                        String type,
-                       LocalDateTime start,
-                       LocalDateTime end,
+                       OffsetDateTime start,
+                       OffsetDateTime end,
                        long customerId,
                        long userId,
                        long contactId) {
@@ -41,12 +46,21 @@ public class Appointment extends Record implements Model<Appointment> {
 
     @Override
     public Appointment copy() {
-        return null;
+        return new Appointment(id, title, description, location, type, start, end, customerId, userId, contactId);
     }
 
     @Override
     public List<Object> toValues() {
-        return new ArrayList(List.of(title, description, location, type, start, end, customerId, userId, contactId));
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return new ArrayList(List.of(title,
+                description,
+                location,
+                type,
+                formatter.format(start.atZoneSameInstant(ZoneOffset.UTC)),
+                formatter.format(end.atZoneSameInstant(ZoneOffset.UTC)),
+                customerId,
+                userId,
+                contactId));
     }
 
     public String getTitle() {
@@ -81,19 +95,19 @@ public class Appointment extends Record implements Model<Appointment> {
         this.type = type.trim();
     }
 
-    public LocalDateTime getStart() {
+    public OffsetDateTime getStart() {
         return start;
     }
 
-    public void setStart(LocalDateTime start) {
+    public void setStart(OffsetDateTime start) {
         this.start = start;
     }
 
-    public LocalDateTime getEnd() {
+    public OffsetDateTime getEnd() {
         return end;
     }
 
-    public void setEnd(LocalDateTime end) {
+    public void setEnd(OffsetDateTime end) {
         this.end = end;
     }
 
@@ -129,10 +143,13 @@ public class Appointment extends Record implements Model<Appointment> {
         return formatDate(end);
     }
 
-    private String formatDate(LocalDateTime date) {
-//        final DateFormat formatter = DateTimeFormatter.
-//        System.out.println(date);
-//        return formatter.format(date);
-        return date.toString();
+    private String formatDate(OffsetDateTime date) {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale);
+        return date.toLocalDateTime().format(formatter);
+    }
+
+    @Override
+    protected void validateDateField(String name) throws ValidationError {
+
     }
 }

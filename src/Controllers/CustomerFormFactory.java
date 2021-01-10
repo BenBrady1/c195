@@ -2,6 +2,7 @@ package Controllers;
 
 import Models.Country;
 import Models.Division;
+import Models.Record;
 
 import java.util.Map;
 
@@ -9,12 +10,13 @@ public final class CustomerFormFactory extends FormFactory<CustomerForm> {
     private Map<Long, Division> divisionMap;
     private Map<Long, Country> countryMap;
 
+    public <M extends Record> CustomerFormFactory(Class<M> modelClass) {
+        super(modelClass);
+    }
+
     @Override
     public CustomerForm getInstance(Type type) {
-        String windowTitle = "Update existing customer";
-        if (type == Type.Create) windowTitle = "Create new customer";
-        if (type == Type.Read) windowTitle = "View existing customer";
-        return new CustomerForm(windowTitle, divisionMap, countryMap);
+        return new CustomerForm(getTitle(type), divisionMap, countryMap);
     }
 
     public void setDivisionMap(Map<Long, Division> divisionMap) {

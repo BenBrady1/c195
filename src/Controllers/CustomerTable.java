@@ -11,18 +11,11 @@ import java.sql.SQLException;
 import java.util.*;
 
 public final class CustomerTable extends Table<Customer> {
-    private final HashMap<Long, Division> divisionMap = new HashMap();
-    private final HashMap<Long, Country> countryMap = new HashMap();
-    private final String insertStatement = "INSERT INTO customers " +
-            "(Customer_Name, Address, Postal_Code, Phone, Division_ID, Created_By, Last_Updated_By) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private final String updateStatement = "UPDATE customers " +
-            "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ?, Last_Updated_By = ?, Last_Update = NOW() " +
-            "WHERE Customer_ID = ?";
-    private final String deleteStatement = "DELETE FROM customers WHERE Customer_ID = ?";
+    private final HashMap<Long, Division> divisionMap = new HashMap<>();
+    private final HashMap<Long, Country> countryMap = new HashMap<>();
 
     public CustomerTable() {
-        super(new CustomerFormFactory());
+        super(new CustomerFormFactory(Customer.class));
         ((CustomerFormFactory) formFactory).setDivisionMap(Collections.unmodifiableMap(divisionMap));
         ((CustomerFormFactory) formFactory).setCountryMap(Collections.unmodifiableMap(countryMap));
     }
@@ -33,12 +26,12 @@ public final class CustomerTable extends Table<Customer> {
         final TableColumn<Customer, String> addressColumn = getStringColumn(Customer.class, "address");
         final TableColumn<Customer, String> postalCodeColumn = getStringColumn(Customer.class, "postalCode");
         final TableColumn<Customer, String> phoneColumn = getStringColumn(Customer.class, "phone");
-        final TableColumn<Customer, String> divisionColumn = new TableColumn(bundle.getString("customer.division"));
+        final TableColumn<Customer, String> divisionColumn = new TableColumn<>(getBundleString("customer.division"));
         divisionColumn.setCellValueFactory(param -> {
             final Division division = divisionMap.get(param.getValue().getDivisionId());
             return new SimpleStringProperty(division.getDivision());
         });
-        final TableColumn<Customer, String> countryColumn = new TableColumn(bundle.getString("customer.country"));
+        final TableColumn<Customer, String> countryColumn = new TableColumn<>(getBundleString("customer.country"));
         countryColumn.setCellValueFactory(param -> {
             final Division division = divisionMap.get(param.getValue().getDivisionId());
             return new SimpleStringProperty(countryMap.get(division.getCountryId()).getCountry());
@@ -120,17 +113,21 @@ public final class CustomerTable extends Table<Customer> {
 
     @Override
     public String getInsertStatement() {
-        return insertStatement;
+        return "INSERT INTO customers " +
+                    "(Customer_Name, Address, Postal_Code, Phone, Division_ID, Created_By, Last_Updated_By) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
     }
 
     @Override
     public String getUpdateStatement() {
-        return updateStatement;
+        return "UPDATE customers " +
+                    "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ?, Last_Updated_By = ?, Last_Update = NOW() " +
+                    "WHERE Customer_ID = ?";
     }
 
     @Override
     public String getDeleteStatement() {
-        return deleteStatement;
+        return "DELETE FROM customers WHERE Customer_ID = ?";
     }
 
     @Override
@@ -140,6 +137,6 @@ public final class CustomerTable extends Table<Customer> {
 
     @Override
     protected String getDeletedMessage() {
-        return bundle.getString("record.deleted.message");
+        return getBundleString("record.deleted.message");
     }
 }

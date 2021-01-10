@@ -4,6 +4,7 @@ import Models.Model;
 import Models.Record;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -29,12 +30,11 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
             final Field field = tClass.getDeclaredField(fieldName);
             field.setAccessible(true);
             final String key = String.format("%s.%s", tClass.getSimpleName().toLowerCase(), field.getName());
-            final TableColumn<T, String> column = new TableColumn(bundle.getString(key));
+            final TableColumn<T, String> column = new TableColumn<>(getBundleString(key));
             column.setCellValueFactory(param -> {
                 try {
                     return new SimpleStringProperty((String) field.get(param.getValue()));
                 } catch (IllegalAccessException e) {
-                    System.out.println("here");
                     e.printStackTrace();
                 }
                 return null;
@@ -58,7 +58,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        final TableColumn<T, Long> idColumn = new TableColumn("ID");
+        final TableColumn<T, Long> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(param -> new SimpleLongProperty(param.getValue().getId()).asObject());
         tableView.getColumns().add(idColumn);
         addColumns();
@@ -77,7 +77,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     private void addToDatabase(T record) {
-        List<Object> arguments = record.toValues();
+        final List<Object> arguments = record.toValues();
         arguments.add(getUserId());
         arguments.add(getUserId());
         executeInsert(getInsertStatement(), arguments, (ex, newId) -> {
@@ -111,14 +111,14 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     @FXML
     private void viewRecord() {
-        T selected = getSelectedRecord();
+        final T selected = getSelectedRecord();
         if (selected != null && formController == null) {
             openForm(FormFactory.Type.Read, selected, Form.Mode.Read, (record) -> finalizeAction());
         }
     }
 
     protected void updateInDatabase(T record) {
-        List<Object> arguments = record.toValues();
+        final List<Object> arguments = record.toValues();
         arguments.add(getUserId());
         arguments.add(record.getId());
         executeUpdate(getUpdateStatement(), arguments, (ex, updateCount) -> {
@@ -131,7 +131,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     @FXML
     private void editRecord() {
-        T selected = getSelectedRecord();
+        final T selected = getSelectedRecord();
         if (selected != null && formController == null) {
             openForm(FormFactory.Type.Update, selected.copy(), Form.Mode.Update, (updatedRecord) -> {
                 if (updatedRecord != null) updateInDatabase(updatedRecord);
@@ -141,11 +141,9 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     protected List<Object> toArray(Object... values) {
-        List<Object> output = new ArrayList();
+        final List<Object> output = new ArrayList<>();
         if (values != null) {
-            for (Object value : values) {
-                output.add(value);
-            }
+            Collections.addAll(output, values);
         } else {
             output.add(null);
         }
@@ -154,10 +152,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     protected void deleteFromDatabase(T record) {
-
-        System.out.println("Deleting record");
         if (deleteDependencies(record)) {
-            System.out.println("Dependencies deleted");
             executeUpdate(getDeleteStatement(), toArray(record.getId()), (ex, updates) -> {
                 if (ex != null) printSQLException(ex);
                 if (updates == 1) record.setId(0);
@@ -171,18 +166,22 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     @FXML
     private void deleteRecord() {
-        T recordToDelete = getSelectedRecord();
+        final T recordToDelete = getSelectedRecord();
         if (recordToDelete != null) {
             deleteButton.setDisable(true);
             deleteFromDatabase(recordToDelete);
             if (recordToDelete.getId() == 0) {
                 tableView.getItems().remove(recordToDelete);
                 tableView.refresh();
-                displayAlert(bundle.getString("record.deleted.title"), getDeletedMessage(), Alert.AlertType.INFORMATION);
+                displayAlert(getBundleString("record.deleted.title"), getDeletedMessage(), Alert.AlertType.INFORMATION);
             }
             deleteButton.setDisable(false);
         }
     }
 
     protected abstract String getDeletedMessage();
+
+    public ObservableList<T> getData() {
+        return tableView.getItems();
+    }
 }

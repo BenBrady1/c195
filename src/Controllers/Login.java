@@ -19,10 +19,7 @@ import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * negotiates the login flow
@@ -71,13 +68,15 @@ public final class Login extends Base implements Initializable {
         final String username = usernameField.getText();
         final String password = passwordField.getText();
         if (username.length() != 0 && password.length() != 0) {
+            final List<Object> arguments = new ArrayList<>();
+            arguments.add(username);
             final long userId = executeQuery("SELECT User_ID, Password " +
                     "FROM users " +
                     "WHERE User_Name = ? " +
-                    "LIMIT 1", new String[]{username}, this::validateUsernameAndPassword);
+                    "LIMIT 1", arguments, this::validateUsernameAndPassword);
             logLoginAttempt(userId != -1);
             if (userId != -1) {
-                Base.userId = Optional.ofNullable(userId);
+                Base.userId = Optional.of(userId);
             }
         }
     }

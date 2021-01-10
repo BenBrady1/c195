@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import java.util.Locale;
+
 public class Main extends Application {
 
     @Override
@@ -15,6 +17,7 @@ public class Main extends Application {
         Base.setLocaleAndBundle();
         Record.bundle = Base.getBundle();
         Record.locale = Base.getLocale();
+        Locale.setDefault(Base.getLocale());
         final Scene scene = new Scene(new StackPane());
 
         View viewController = new View(scene, primaryStage);

@@ -10,8 +10,8 @@ import java.util.Optional;
  * manages which view to display at any given point
  */
 public final class View extends Base {
-    private Scene scene;
-    private Stage primaryStage;
+    private final Scene scene;
+    private final Stage primaryStage;
 
     public View(final Scene scene, final Stage primaryStage) {
         this.scene = scene;
@@ -29,7 +29,7 @@ public final class View extends Base {
 //        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Login.fxml"), bundle);
 //        scene.setRoot(loader.load());
 //        loader.<Login>getController().setViewController(this);
-        primaryStage.setTitle(bundle.getString("app.title"));
+        primaryStage.setTitle(getBundleString("app.title"));
 //        primaryStage.setWidth(600);
 //        primaryStage.setHeight(400);
     }
