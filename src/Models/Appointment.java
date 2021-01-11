@@ -1,15 +1,13 @@
 package Models;
 
-import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Appointment extends Record implements Model<Appointment> {
     private String title;
@@ -149,7 +147,19 @@ public class Appointment extends Record implements Model<Appointment> {
     }
 
     @Override
-    protected void validateDateField(String name) throws ValidationError {
+    protected void customValidate() throws ValidationError {
+        checkDateRange(start.atZoneSameInstant(ZoneId.of("US/Eastern")), bundle.getString("appointment.start"));
+        checkDateRange(end.atZoneSameInstant(ZoneId.of("US/Eastern")), bundle.getString("appointment.end"));
+        if (start.compareTo(end) > 0) {
+            // FIXME: translate
+            throw new ValidationError("start comes after end");
+        }
+    }
 
+    private void checkDateRange(ZonedDateTime date, String name) throws ValidationError {
+        if (date.getHour() < 8 || date.getHour() > 22 || (date.getHour() == 22 && date.getMinute() != 0)) {
+            // FIXME: translate
+            throw new ValidationError(String.format("%s outside range", name));
+        }
     }
 }

@@ -57,7 +57,6 @@ public abstract class Record {
                         throw new ValidationError(getErrorMessage(declaredField.getName(), "empty"));
                     }
                 } else if (value instanceof OffsetDateTime) {
-                    validateDateField(declaredField.getName());
                 } else {
                     throw new ValidationError("unreachable");
                 }
@@ -65,11 +64,11 @@ public abstract class Record {
                 System.out.println(ex);
             }
         }
+        
+        customValidate();
     }
 
-    protected void validateDateField(String name) throws ValidationError {
-        throw new ValidationError("unreachable");
-    }
+    protected void customValidate() throws ValidationError {};
 
     protected List<Field> getRequiredFields() {
         return Arrays.stream(getClass().getDeclaredFields()).collect(Collectors.toList());

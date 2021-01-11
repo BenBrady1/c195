@@ -65,9 +65,7 @@ public class AppointmentForm extends Form<Appointment> {
         buildUserMap();
         initializeDateFields();
         contactComboBox.getItems().addAll(contactMap.values());
-        contactComboBox.setDisable(readOnly);
         customerComboBox.getItems().addAll(customerMap.values());
-        customerComboBox.setDisable(readOnly);
         super.initialize(url, resourceBundle);
     }
 
@@ -93,6 +91,7 @@ public class AppointmentForm extends Form<Appointment> {
 
     private <T extends Record> void setComboBoxFromMap(ComboBox<T> comboBox, Map<Long, T> map, long id) {
         if (id != 0) comboBox.getSelectionModel().select(map.get(id));
+        comboBox.setDisable(readOnly);
     }
 
     private void setDateFields(OffsetDateTime date,
@@ -103,9 +102,13 @@ public class AppointmentForm extends Form<Appointment> {
         final LocalDateTime ldt = date.toLocalDateTime();
         final int modHour = ldt.getHour() % 12;
         hourPicker.setValue(Integer.toString(modHour == 0 ? 12 : modHour));
+        hourPicker.setDisable(readOnly);
         minutePicker.setValue(String.format("%02d", ldt.getMinute()));
+        minutePicker.setDisable(readOnly);
         datePicker.setValue(ldt.toLocalDate());
+        datePicker.setDisable(readOnly);
         meridiemPicker.setValue(ldt.getHour() >= 12 ? "pm" : "am");
+        meridiemPicker.setDisable(readOnly);
     }
 
     @Override
