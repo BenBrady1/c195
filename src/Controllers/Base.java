@@ -244,6 +244,18 @@ abstract public class Base {
         displayError(getBundleString("error.defaultTitle"), ex.getMessage());
     }
 
+
+    /**
+     * A wrapper around Base#displayError(String, String) with a default title
+     *
+     * @param message the string holding the message to display
+     * @see Base#displayError(String, String)
+     */
+    protected void displayError(String message) {
+        displayError(getBundleString("error.defaultTitle"), message);
+    }
+
+
     /**
      * A wrapper around Base#displayAlert(String, String, Alert.AlertType) to display errors to the end user.
      *

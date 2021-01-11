@@ -137,6 +137,7 @@ public final class CustomerTable extends Table<Customer> {
 
     @Override
     protected String getDeletedMessage() {
-        return getBundleString("record.deleted.message");
+        return getBundleString("record.deleted.message")
+                .replace("%{record}", getBundleString("customer.customer"));
     }
 }

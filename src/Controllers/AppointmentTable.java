@@ -8,23 +8,33 @@ import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 
 public class AppointmentTable extends Table<Appointment> implements Initializable {
+    private Filter filterController = new Filter();
+
     private HashMap<Long, Contact> contactMap = new HashMap<>();
 
     private ObservableList<Customer> customers;
+    final private String selectQuery = "SELECT Appointment_ID, Title, Description, `Location`, `Type`, `Start`, `End`, Customer_ID, User_ID, Contact_ID " +
+            "FROM appointments";
 
     public AppointmentTable(ObservableList<Customer> customers) {
         super(new AppointmentFormFactory(Appointment.class));
         ((AppointmentFormFactory) formFactory).setContactMap(Collections.unmodifiableMap(contactMap));
         ((AppointmentFormFactory) formFactory).setCustomers(Collections.unmodifiableList(customers));
         this.customers = customers;
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        super.initialize(url, resourceBundle);
+        filterButton.setDisable(false);
+        filterButton.setVisible(true);
     }
 
     @Override
@@ -53,8 +63,7 @@ public class AppointmentTable extends Table<Appointment> implements Initializabl
 
     @Override
     protected void populateData() {
-        executeQuery("SELECT Appointment_ID, Title, Description, `Location`, `Type`, `Start`, `End`, Customer_ID, User_ID, Contact_ID " +
-                "FROM appointments", this::parseAppointments);
+        executeQuery(selectQuery, this::parseAppointments);
         executeQuery("SELECT * FROM contacts", this::buildContactMap);
     }
 
@@ -111,20 +120,38 @@ public class AppointmentTable extends Table<Appointment> implements Initializabl
 
     @Override
     protected boolean deleteDependencies(Appointment record) {
-        return false;
+        return true;
     }
 
     @Override
     protected String getDeleteStatement() {
-        return null;
+        return "DELETE FROM appointments WHERE Appointment_ID = ?";
     }
 
     @Override
     protected String getDeletedMessage() {
-        return null;
+        return getBundleString("record.deleted.message")
+                .replace("%{record}", getBundleString("appointment.appointment"));
     }
 
     protected String nonZero(long val) {
         return val == 0 ? "" : Long.toString(val);
+    }
+
+    @Override
+    protected void addFilter() {
+        filterController.openFilterWindow((fields) -> {
+            List<Object> arguments = null;
+            String query = selectQuery;
+            tableView.getItems().clear();
+            if (fields != null) {
+                System.out.println(fields.year);
+                System.out.println(fields.field);
+                System.out.println(fields.fieldValue);
+                query += String.format(" WHERE YEAR(`Start`) = ? AND %s(`Start`) = ?", fields.field);
+                arguments = toArray(fields.year, fields.fieldValue);
+            }
+            executeQuery(query, arguments, this::parseAppointments);
+        });
     }
 }

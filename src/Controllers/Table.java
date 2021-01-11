@@ -22,6 +22,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     protected TableView<T> tableView;
     @FXML
     private Button deleteButton;
+    @FXML
+    protected Button filterButton;
 
     protected abstract void addColumns();
 
@@ -58,6 +60,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        filterButton.setDisable(true);
+        filterButton.setVisible(false);
         final TableColumn<T, Long> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(param -> new SimpleLongProperty(param.getValue().getId()).asObject());
         tableView.getColumns().add(idColumn);
@@ -153,6 +157,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     protected void deleteFromDatabase(T record) {
         if (deleteDependencies(record)) {
+            System.out.println(record.getId());
             executeUpdate(getDeleteStatement(), toArray(record.getId()), (ex, updates) -> {
                 if (ex != null) printSQLException(ex);
                 if (updates == 1) record.setId(0);
@@ -167,6 +172,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     @FXML
     private void deleteRecord() {
         final T recordToDelete = getSelectedRecord();
+        System.out.println("record to delete:");
+        System.out.println(recordToDelete);
         if (recordToDelete != null) {
             deleteButton.setDisable(true);
             deleteFromDatabase(recordToDelete);
@@ -184,4 +191,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     public ObservableList<T> getData() {
         return tableView.getItems();
     }
+
+    @FXML
+    protected void addFilter() {}
 }

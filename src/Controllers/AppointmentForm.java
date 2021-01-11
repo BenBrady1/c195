@@ -102,10 +102,10 @@ public class AppointmentForm extends Form<Appointment> {
                                ChoiceBox<String> meridiemPicker) {
         final LocalDateTime ldt = date.toLocalDateTime();
         final int modHour = ldt.getHour() % 12;
-        hourPicker.getSelectionModel().select(Integer.toString(modHour == 0 ? 12 : modHour));
-        minutePicker.getSelectionModel().select(Integer.toString(ldt.getMinute()));
+        hourPicker.setValue(Integer.toString(modHour == 0 ? 12 : modHour));
+        minutePicker.setValue(String.format("%02d", ldt.getMinute()));
         datePicker.setValue(ldt.toLocalDate());
-        meridiemPicker.getSelectionModel().select(ldt.getHour() >= 12 ? "pm" : "am");
+        meridiemPicker.setValue(ldt.getHour() >= 12 ? "pm" : "am");
     }
 
     @Override

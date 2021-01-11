@@ -9,8 +9,8 @@
     <bottom>
         <ButtonBar fx:id="buttonBar" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <buttons>
-                <Button defaultButton="true" mnemonicParsing="false" onAction="#handleSave" text="%form.save"/>
-                <Button cancelButton="true" mnemonicParsing="false" onAction="#handleClose" text="%form.cancel"/>
+                <Button defaultButton="true" mnemonicParsing="false" onAction="#handleSave" text="%button.save"/>
+                <Button cancelButton="true" mnemonicParsing="false" onAction="#handleClose" text="%button.cancel"/>
             </buttons>
             <opaqueInsets>
                 <Insets/>
