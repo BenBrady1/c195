@@ -1,9 +1,6 @@
 package Models;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
@@ -14,8 +11,8 @@ public class Appointment extends Record implements Model<Appointment> {
     private String description;
     private String location;
     private String type;
-    private OffsetDateTime start;
-    private OffsetDateTime end;
+    private LocalDateTime start;
+    private LocalDateTime end;
     private long customerId;
     private long userId;
     private long contactId;
@@ -25,8 +22,8 @@ public class Appointment extends Record implements Model<Appointment> {
                        String description,
                        String location,
                        String type,
-                       OffsetDateTime start,
-                       OffsetDateTime end,
+                       LocalDateTime start,
+                       LocalDateTime end,
                        long customerId,
                        long userId,
                        long contactId) {
@@ -49,13 +46,12 @@ public class Appointment extends Record implements Model<Appointment> {
 
     @Override
     public List<Object> toValues() {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return new ArrayList(List.of(title,
                 description,
                 location,
                 type,
-                formatter.format(start.atZoneSameInstant(ZoneOffset.UTC)),
-                formatter.format(end.atZoneSameInstant(ZoneOffset.UTC)),
+                getSQLStart(),
+                getSQLEnd(),
                 customerId,
                 userId,
                 contactId));
@@ -93,19 +89,19 @@ public class Appointment extends Record implements Model<Appointment> {
         this.type = type.trim();
     }
 
-    public OffsetDateTime getStart() {
+    public LocalDateTime getStart() {
         return start;
     }
 
-    public void setStart(OffsetDateTime start) {
+    public void setStart(LocalDateTime start) {
         this.start = start;
     }
 
-    public OffsetDateTime getEnd() {
+    public LocalDateTime getEnd() {
         return end;
     }
 
-    public void setEnd(OffsetDateTime end) {
+    public void setEnd(LocalDateTime end) {
         this.end = end;
     }
 
@@ -133,23 +129,44 @@ public class Appointment extends Record implements Model<Appointment> {
         this.contactId = contactId;
     }
 
+    public String getSQLStart() {
+        return formatSQLDate(start);
+    }
+
+    public String getSQLEnd() {
+        return formatSQLDate(end);
+    }
+
+    private String formatSQLDate(LocalDateTime date) {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return formatter.format(date.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")));
+    }
+
     public String getFormattedStart() {
-        return formatDate(start);
+        return formatLocalDate(start);
     }
 
     public String getFormattedEnd() {
-        return formatDate(end);
+        return formatLocalDate(end);
     }
 
-    private String formatDate(OffsetDateTime date) {
+    private String formatLocalDate(LocalDateTime date) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale);
-        return date.toLocalDateTime().format(formatter);
+        return date.format(formatter);
+    }
+
+    public ZonedDateTime getLocalStart() {
+        return start.atZone(ZoneId.systemDefault());
+    }
+
+    public ZonedDateTime getLocalEnd() {
+        return end.atZone(ZoneId.systemDefault());
     }
 
     @Override
     protected void customValidate() throws ValidationError {
-        checkDateRange(start.atZoneSameInstant(ZoneId.of("US/Eastern")), bundle.getString("appointment.start"));
-        checkDateRange(end.atZoneSameInstant(ZoneId.of("US/Eastern")), bundle.getString("appointment.end"));
+        checkDateRange(start.atZone(ZoneId.of("US/Eastern")), bundle.getString("appointment.start"));
+        checkDateRange(end.atZone(ZoneId.of("US/Eastern")), bundle.getString("appointment.end"));
         if (start.compareTo(end) > 0) {
             // FIXME: translate
             throw new ValidationError("start comes after end");

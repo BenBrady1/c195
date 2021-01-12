@@ -1,7 +1,7 @@
 package Models;
 
 import java.lang.reflect.Field;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -52,11 +52,10 @@ public abstract class Record {
                         throw new ValidationError(getErrorMessage(declaredField.getName(), "empty"));
                     }
                 } else if (value instanceof Long) {
-                    System.out.println(declaredField.getName());
                     if ((Long) value == 0) {
                         throw new ValidationError(getErrorMessage(declaredField.getName(), "empty"));
                     }
-                } else if (value instanceof OffsetDateTime) {
+                } else if (value instanceof LocalDateTime) {
                 } else {
                     throw new ValidationError("unreachable");
                 }
@@ -64,11 +63,12 @@ public abstract class Record {
                 System.out.println(ex);
             }
         }
-        
+
         customValidate();
     }
 
-    protected void customValidate() throws ValidationError {};
+    protected void customValidate() throws ValidationError {
+    }
 
     protected List<Field> getRequiredFields() {
         return Arrays.stream(getClass().getDeclaredFields()).collect(Collectors.toList());

@@ -43,7 +43,6 @@ public class Main extends Base implements Initializable {
     private void populateCustomerData() {
         if (customerTabInitialized) return;
         customerTabInitialized = true;
-        System.out.println("Fetching customer data");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Table.fxml"), bundle);
         customerTableController = new CustomerTable();
         loader.setController(customerTableController);
@@ -58,7 +57,6 @@ public class Main extends Base implements Initializable {
     private void populateAppointmentData() {
         if (appointmentTabInitialized) return;
         appointmentTabInitialized = true;
-        System.out.println("Fetching appointment data");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Table.fxml"), bundle);
         loader.setController(new AppointmentTable(customerTableController.getData()));
         try {

@@ -81,13 +81,15 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     private void addToDatabase(T record) {
-        final List<Object> arguments = record.toValues();
-        arguments.add(getUserId());
-        arguments.add(getUserId());
-        executeInsert(getInsertStatement(), arguments, (ex, newId) -> {
-            if (ex != null) printSQLException(ex);
-            if (newId != null) record.setId(newId);
-        });
+        if (canUpdate(record)) {
+            final List<Object> arguments = record.toValues();
+            arguments.add(getUserId());
+            arguments.add(getUserId());
+            executeInsert(getInsertStatement(), arguments, (ex, newId) -> {
+                if (ex != null) printSQLException(ex);
+                if (newId != null) record.setId(newId);
+            });
+        }
     }
 
     protected abstract String getInsertStatement();
@@ -122,14 +124,18 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     protected void updateInDatabase(T record) {
-        final List<Object> arguments = record.toValues();
-        arguments.add(getUserId());
-        arguments.add(record.getId());
-        executeUpdate(getUpdateStatement(), arguments, (ex, updateCount) -> {
-            if (ex != null) printSQLException(ex);
-            if (updateCount == 1) getSelectedRecord().applyChanges(record);
-        });
+        if (canUpdate(record)) {
+            final List<Object> arguments = record.toValues();
+            arguments.add(getUserId());
+            arguments.add(record.getId());
+            executeUpdate(getUpdateStatement(), arguments, (ex, updateCount) -> {
+                if (ex != null) printSQLException(ex);
+                if (updateCount == 1) getSelectedRecord().applyChanges(record);
+            });
+        }
     }
+
+    protected abstract boolean canUpdate(T record);
 
     protected abstract String getUpdateStatement();
 
@@ -157,7 +163,6 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     protected void deleteFromDatabase(T record) {
         if (deleteDependencies(record)) {
-            System.out.println(record.getId());
             executeUpdate(getDeleteStatement(), toArray(record.getId()), (ex, updates) -> {
                 if (ex != null) printSQLException(ex);
                 if (updates == 1) record.setId(0);
@@ -172,8 +177,6 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     @FXML
     private void deleteRecord() {
         final T recordToDelete = getSelectedRecord();
-        System.out.println("record to delete:");
-        System.out.println(recordToDelete);
         if (recordToDelete != null) {
             deleteButton.setDisable(true);
             deleteFromDatabase(recordToDelete);

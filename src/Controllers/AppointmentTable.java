@@ -11,7 +11,6 @@ import javafx.scene.control.TableColumn;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZoneOffset;
 import java.util.*;
 
 public class AppointmentTable extends Table<Appointment> implements Initializable {
@@ -77,8 +76,8 @@ public class AppointmentTable extends Table<Appointment> implements Initializabl
                         rs.getString(3),
                         rs.getString(4),
                         rs.getString(5),
-                        rs.getTimestamp(6).toLocalDateTime().atOffset(ZoneOffset.UTC),
-                        rs.getTimestamp(7).toLocalDateTime().atOffset(ZoneOffset.UTC),
+                        rs.getTimestamp(6).toLocalDateTime(),
+                        rs.getTimestamp(7).toLocalDateTime(),
                         rs.getLong(8),
                         rs.getLong(9),
                         rs.getLong(10)));
@@ -145,13 +144,32 @@ public class AppointmentTable extends Table<Appointment> implements Initializabl
             String query = selectQuery;
             tableView.getItems().clear();
             if (fields != null) {
-                System.out.println(fields.year);
-                System.out.println(fields.field);
-                System.out.println(fields.fieldValue);
                 query += String.format(" WHERE YEAR(`Start`) = ? AND %s(`Start`) = ?", fields.field);
                 arguments = toArray(fields.year, fields.fieldValue);
             }
             executeQuery(query, arguments, this::parseAppointments);
+        });
+    }
+
+    @Override
+    protected boolean canUpdate(Appointment record) {
+        String query = "SELECT COUNT(*) FROM appointments " +
+                "WHERE (UNIX_TIMESTAMP(`START`) BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)" +
+                "OR UNIX_TIMESTAMP(`END`) BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?))";
+        final List<Object> arguments = toArray(record.getSQLStart(), record.getSQLEnd(), record.getSQLStart(), record.getSQLEnd());
+        if (record.getId() != 0L) {
+            query += " AND Appointment_Id != ?";
+            arguments.add(record.getId());
+        }
+        return executeQuery(query, arguments, (ex, rs) -> {
+            if (ex != null) return false;
+            try {
+                rs.next();
+                return rs.getInt("COUNT(*)") == 0;
+            } catch (SQLException exception) {
+                printSQLException(exception);
+                return false;
+            }
         });
     }
 }

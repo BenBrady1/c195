@@ -8,7 +8,8 @@ import javafx.scene.control.TableColumn;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
 
 public final class CustomerTable extends Table<Customer> {
     private final HashMap<Long, Division> divisionMap = new HashMap<>();
@@ -41,8 +42,7 @@ public final class CustomerTable extends Table<Customer> {
 
     @Override
     protected final void populateData() {
-        executeQuery("SELECT Division_ID, Division, Country_ID " +
-                "FROM first_level_divisions", (ex, rs) -> {
+        executeQuery("SELECT Division_ID, Division, Country_ID FROM first_level_divisions", (ex, rs) -> {
             if (ex == null) {
                 buildDivisionMap(rs);
             } else {
@@ -64,6 +64,20 @@ public final class CustomerTable extends Table<Customer> {
             } else {
                 printSQLException(ex);
             }
+        });
+        executeQuery("SELECT COUNT(*) FROM appointments " +
+                "WHERE `Start` BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)", (ex, rs) -> {
+            if (ex != null) return;
+            try {
+                rs.next();
+                if (rs.getInt("COUNT(*)") != 0) {
+                    // TODO: display notification
+                    System.out.println("UPCOMING APPOINTMENT");
+                }
+            } catch (SQLException exception) {
+                printSQLException(exception);
+            }
+
         });
     }
 
@@ -114,15 +128,15 @@ public final class CustomerTable extends Table<Customer> {
     @Override
     public String getInsertStatement() {
         return "INSERT INTO customers " +
-                    "(Customer_Name, Address, Postal_Code, Phone, Division_ID, Created_By, Last_Updated_By) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                "(Customer_Name, Address, Postal_Code, Phone, Division_ID, Created_By, Last_Updated_By) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
     }
 
     @Override
     public String getUpdateStatement() {
         return "UPDATE customers " +
-                    "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ?, Last_Updated_By = ?, Last_Update = NOW() " +
-                    "WHERE Customer_ID = ?";
+                "SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ?, Last_Updated_By = ?, Last_Update = NOW() " +
+                "WHERE Customer_ID = ?";
     }
 
     @Override
@@ -139,5 +153,10 @@ public final class CustomerTable extends Table<Customer> {
     protected String getDeletedMessage() {
         return getBundleString("record.deleted.message")
                 .replace("%{record}", getBundleString("customer.customer"));
+    }
+
+    @Override
+    protected boolean canUpdate(Customer record) {
+        return true;
     }
 }
