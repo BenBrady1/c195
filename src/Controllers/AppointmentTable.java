@@ -22,11 +22,12 @@ public class AppointmentTable extends Table<Appointment> implements Initializabl
     final private String selectQuery = "SELECT Appointment_ID, Title, Description, `Location`, `Type`, `Start`, `End`, Customer_ID, User_ID, Contact_ID " +
             "FROM appointments";
 
-    public AppointmentTable(ObservableList<Customer> customers) {
-        super(new AppointmentFormFactory(Appointment.class));
+    public AppointmentTable(ObservableList<Customer> customers, Main.EventEmitter eventEmitter) {
+        super(new AppointmentFormFactory(Appointment.class), eventEmitter);
         ((AppointmentFormFactory) formFactory).setContactMap(Collections.unmodifiableMap(contactMap));
         ((AppointmentFormFactory) formFactory).setCustomers(Collections.unmodifiableList(customers));
         this.customers = customers;
+        eventEmitter.addListener(Main.Event.CustomerDeleted, this::populateTable);
     }
 
     @Override
@@ -66,9 +67,14 @@ public class AppointmentTable extends Table<Appointment> implements Initializabl
         executeQuery("SELECT * FROM contacts", this::buildContactMap);
     }
 
+    private void populateTable() {
+        executeQuery(selectQuery, this::parseAppointments);
+    }
+
     private void parseAppointments(SQLException ex, ResultSet rs) {
         if (ex != null) return;
         final ObservableList<Appointment> appointments = tableView.getItems();
+        appointments.clear();
         try {
             while (rs.next()) {
                 appointments.add(new Appointment(rs.getLong(1),

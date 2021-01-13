@@ -15,8 +15,8 @@ public final class CustomerTable extends Table<Customer> {
     private final HashMap<Long, Division> divisionMap = new HashMap<>();
     private final HashMap<Long, Country> countryMap = new HashMap<>();
 
-    public CustomerTable() {
-        super(new CustomerFormFactory(Customer.class));
+    public CustomerTable(Main.EventEmitter eventEmitter) {
+        super(new CustomerFormFactory(Customer.class), eventEmitter);
         ((CustomerFormFactory) formFactory).setDivisionMap(Collections.unmodifiableMap(divisionMap));
         ((CustomerFormFactory) formFactory).setCountryMap(Collections.unmodifiableMap(countryMap));
     }
@@ -158,5 +158,10 @@ public final class CustomerTable extends Table<Customer> {
     @Override
     protected boolean canUpdate(Customer record) {
         return true;
+    }
+
+    @Override
+    protected void emitEvent() {
+        eventEmitter.emit(Main.Event.CustomerDeleted);
     }
 }

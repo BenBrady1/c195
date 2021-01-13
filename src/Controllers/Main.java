@@ -8,9 +8,32 @@ import javafx.scene.control.TabPane;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class Main extends Base implements Initializable {
+    public enum Event {
+        CustomerDeleted
+    }
+
+    final public class EventEmitter implements java.util.EventListener {
+        final private HashMap<Event, List<Runnable>> eventMap = new HashMap<>();
+
+        public void addListener(Event e, Runnable r) {
+            List<Runnable> listeners = eventMap.get(e);
+            if (listeners == null) {
+                listeners = new ArrayList<>();
+                eventMap.put(e, listeners);
+            }
+            listeners.add(r);
+        }
+
+        public void emit(Event e) {
+            for (Runnable runnable : eventMap.get(e)) {
+                runnable.run();
+            }
+        }
+    }
+
     @FXML
     private TabPane tabPane;
     @FXML
@@ -21,6 +44,7 @@ public class Main extends Base implements Initializable {
     private boolean customerTabInitialized = false;
     private boolean appointmentTabInitialized = false;
 
+    private EventEmitter eventEmitter = new EventEmitter();
     private CustomerTable customerTableController;
 
     @Override
@@ -44,7 +68,7 @@ public class Main extends Base implements Initializable {
         if (customerTabInitialized) return;
         customerTabInitialized = true;
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Table.fxml"), bundle);
-        customerTableController = new CustomerTable();
+        customerTableController = new CustomerTable(eventEmitter);
         loader.setController(customerTableController);
         try {
             customerTab.setContent(loader.load());
@@ -58,7 +82,7 @@ public class Main extends Base implements Initializable {
         if (appointmentTabInitialized) return;
         appointmentTabInitialized = true;
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Table.fxml"), bundle);
-        loader.setController(new AppointmentTable(customerTableController.getData()));
+        loader.setController(new AppointmentTable(customerTableController.getData(), eventEmitter));
         try {
             appointmentTab.setContent(loader.load());
         } catch (IOException ex) {

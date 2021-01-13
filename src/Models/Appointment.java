@@ -165,11 +165,16 @@ public class Appointment extends Record implements Model<Appointment> {
 
     @Override
     protected void customValidate() throws ValidationError {
-        checkDateRange(start.atZone(ZoneId.of("US/Eastern")), bundle.getString("appointment.start"));
-        checkDateRange(end.atZone(ZoneId.of("US/Eastern")), bundle.getString("appointment.end"));
+        final ZonedDateTime startEST = start.atZone(ZoneId.of("US/Eastern"));
+        final ZonedDateTime endEST = end.atZone(ZoneId.of("US/Eastern"));
+        checkDateRange(startEST, bundle.getString("appointment.start"));
+        checkDateRange(endEST, bundle.getString("appointment.end"));
         if (start.compareTo(end) > 0) {
             // FIXME: translate
             throw new ValidationError("start comes after end");
+        }
+        if (!startEST.toLocalDate().equals(endEST.toLocalDate())) {
+            throw new ValidationError("should be same day");
         }
     }
 

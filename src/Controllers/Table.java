@@ -14,7 +14,10 @@ import javafx.scene.control.TableView;
 
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 public abstract class Table<T extends Record & Model<T>> extends Base implements Initializable {
@@ -24,6 +27,15 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     private Button deleteButton;
     @FXML
     protected Button filterButton;
+
+    protected Form<T> formController;
+    final protected FormFactory formFactory;
+    final protected Main.EventEmitter eventEmitter;
+
+    public Table(FormFactory formFactory, Main.EventEmitter eventEmitter) {
+        this.formFactory = formFactory;
+        this.eventEmitter = eventEmitter;
+    }
 
     protected abstract void addColumns();
 
@@ -50,13 +62,6 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     protected abstract void populateData();
-
-    protected Form<T> formController;
-    protected FormFactory formFactory;
-
-    public Table(FormFactory formFactory) {
-        this.formFactory = formFactory;
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -175,7 +180,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     protected abstract String getDeleteStatement();
 
     @FXML
-    private void deleteRecord() {
+    protected void deleteRecord() {
         final T recordToDelete = getSelectedRecord();
         if (recordToDelete != null) {
             deleteButton.setDisable(true);
@@ -184,9 +189,13 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
                 tableView.getItems().remove(recordToDelete);
                 tableView.refresh();
                 displayAlert(getBundleString("record.deleted.title"), getDeletedMessage(), Alert.AlertType.INFORMATION);
+                emitEvent();
             }
             deleteButton.setDisable(false);
         }
+    }
+
+    protected void emitEvent() {
     }
 
     protected abstract String getDeletedMessage();
@@ -196,5 +205,6 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     @FXML
-    protected void addFilter() {}
+    protected void addFilter() {
+    }
 }
