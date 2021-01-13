@@ -6,7 +6,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Appointment extends Record implements Model<Appointment> {
+public class Appointment extends Record implements Model<Appointment>, Reportable {
     private String title;
     private String description;
     private String location;
@@ -183,5 +183,18 @@ public class Appointment extends Record implements Model<Appointment> {
             // FIXME: translate
             throw new ValidationError(String.format("%s outside range", name));
         }
+    }
+
+    public String toReportString() {
+        //  appointment ID, title, type and description, start date and time, end date and time, and customer ID
+        String output = "";
+        output += String.format("\t%s: %d\n", "ID", id);
+        output += String.format("\t%s: %s\n", bundle.getString("appointment.title"), title);
+        output += String.format("\t%s: %s\n", bundle.getString("appointment.type"), type);
+        output += String.format("\t%s: %s\n", bundle.getString("appointment.description"), description);
+        output += String.format("\t%s: %s\n", bundle.getString("appointment.start"), getFormattedStart());
+        output += String.format("\t%s: %s\n", bundle.getString("appointment.end"), getFormattedEnd());
+        output += String.format("\t%s: %s\n", bundle.getString("appointment.customerId"), customerId);
+        return output + "\n";
     }
 }

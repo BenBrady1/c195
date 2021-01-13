@@ -13,14 +13,12 @@
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Login">
     <center>
         <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-            <children>
-                <Label layoutX="132.0" layoutY="171.0" text="%login.username"/>
-                <TextField fx:id="usernameField" layoutX="226.0" layoutY="167.0" onKeyReleased="#handleEnter"/>
-                <Label layoutX="133.0" layoutY="209.0" text="%login.password"/>
-                <PasswordField fx:id="passwordField" layoutX="226.0" layoutY="205.0" onKeyReleased="#handleEnter"/>
-                <Label fx:id="zoneLabel" layoutX="545.0" layoutY="14.0" text="en_US"/>
-                <Label fx:id="zoneLabel1" layoutX="509.0" layoutY="14.0" text="Zone:"/>
-            </children>
+            <Label layoutX="132.0" layoutY="171.0" text="%login.username"/>
+            <TextField fx:id="usernameField" layoutX="226.0" layoutY="167.0" onKeyReleased="#handleEnter"/>
+            <Label layoutX="133.0" layoutY="209.0" text="%login.password"/>
+            <PasswordField fx:id="passwordField" layoutX="226.0" layoutY="205.0" onKeyReleased="#handleEnter"/>
+            <Label fx:id="zoneLabel" layoutX="545.0" layoutY="14.0" text="en_US"/>
+            <Label fx:id="zoneLabel1" layoutX="509.0" layoutY="14.0" text="Zone:"/>
         </AnchorPane>
     </center>
     <bottom>

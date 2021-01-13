@@ -3,7 +3,7 @@ package Models;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Customer extends Record implements Model<Customer> {
+public final class Customer extends Record implements Model<Customer>, Reportable {
     private String name;
     private String address;
     private String postalCode;
@@ -72,5 +72,10 @@ public final class Customer extends Record implements Model<Customer> {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public String toReportString() {
+        return String.format("\t%d\t%s\n", id, name);
     }
 }

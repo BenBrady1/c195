@@ -1,6 +1,6 @@
 package Models;
 
-public class Contact extends Record {
+public class Contact extends Record implements Reportable {
     final String name;
     final String email;
 
@@ -21,5 +21,9 @@ public class Contact extends Record {
     @Override
     public String toString() {
         return name;
+    }
+
+    public String toReportString() {
+        return String.format("%d\t%s\t%s\n", id, name, email);
     }
 }

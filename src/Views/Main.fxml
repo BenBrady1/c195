@@ -10,9 +10,8 @@
     <Tab fx:id="customerTab" closable="false" text="%tab.customers">
     </Tab>
     <Tab fx:id="appointmentTab" closable="false" text="%tab.appointments">
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
     </Tab>
     <Tab closable="false" text="%tab.reports">
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
+        <fx:include source="Report.fxml"/>
     </Tab>
 </TabPane>

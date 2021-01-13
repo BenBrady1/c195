@@ -37,9 +37,9 @@ public class Main extends Base implements Initializable {
     @FXML
     private TabPane tabPane;
     @FXML
-    Tab customerTab;
+    private Tab customerTab;
     @FXML
-    Tab appointmentTab;
+    private Tab appointmentTab;
 
     private boolean customerTabInitialized = false;
     private boolean appointmentTabInitialized = false;

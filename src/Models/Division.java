@@ -1,10 +1,10 @@
 package Models;
 
-public class Division extends Record {
+public class Division extends Record implements Reportable {
     private final String division;
     private final long countryId;
 
-    public Division(int id, String division, long countryId) {
+    public Division(long id, String division, long countryId) {
         super(id);
         this.division = division;
         this.countryId = countryId;
@@ -21,5 +21,10 @@ public class Division extends Record {
     @Override
     public String toString() {
         return division;
+    }
+
+    @Override
+    public String toReportString() {
+        return String.format("%d\t%s:\n", id, division);
     }
 }
