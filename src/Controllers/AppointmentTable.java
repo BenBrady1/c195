@@ -39,17 +39,17 @@ public class AppointmentTable extends Table<Appointment> implements Initializabl
 
     @Override
     protected void addColumns() {
-        final TableColumn<Appointment, String> contactCol = new TableColumn<>(getBundleString("appointment.contact"));
+        final TableColumn<Appointment, String> contactCol = new TableColumn<>(bundle.getString("appointment.contact"));
         contactCol
                 .setCellValueFactory(param -> {
                     final Optional<Contact> contact = Optional.ofNullable(contactMap.get(param.getValue().getContactId()));
                     return new SimpleStringProperty(contact.map(Contact::getName).orElse(""));
                 });
-        final TableColumn<Appointment, String> startCol = new TableColumn<>(getBundleString("appointment.start"));
+        final TableColumn<Appointment, String> startCol = new TableColumn<>(bundle.getString("appointment.start"));
         startCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getFormattedStart()));
-        final TableColumn<Appointment, String> endCol = new TableColumn<>(getBundleString("appointment.end"));
+        final TableColumn<Appointment, String> endCol = new TableColumn<>(bundle.getString("appointment.end"));
         endCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getFormattedEnd()));
-        final TableColumn<Appointment, String> customerIdCol = new TableColumn<>(getBundleString("appointment.customerId"));
+        final TableColumn<Appointment, String> customerIdCol = new TableColumn<>(bundle.getString("appointment.customerId"));
         customerIdCol.setCellValueFactory(param -> new SimpleStringProperty(nonZero(param.getValue().getCustomerId())));
         tableView.getColumns().addAll(getStringColumn(Appointment.class, "title"),
                 getStringColumn(Appointment.class, "description"),
@@ -135,8 +135,8 @@ public class AppointmentTable extends Table<Appointment> implements Initializabl
 
     @Override
     protected String getDeletedMessage() {
-        return getBundleString("record.deleted.message")
-                .replace("%{record}", getBundleString("appointment.appointment"));
+        return bundle.getString("record.deleted.message")
+                .replace("%{record}", bundle.getString("appointment.appointment"));
     }
 
     protected String nonZero(long val) {

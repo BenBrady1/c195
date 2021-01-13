@@ -64,11 +64,11 @@ public class Report extends Base implements Initializable {
                 "FROM appointments GROUP BY `Type` " +
                 "ORDER BY `Type`", this::parseTypesCount);
 
-        String display = getBundleString("report.byMonth") + ":\n";
+        String display = bundle.getString("report.byMonth") + ":\n";
         for (Pair<String, Integer> monthsCount : monthsCounts) {
             display += formatPair(monthsCount);
         }
-        display += "\n" + getBundleString("report.byType") + ":\n";
+        display += "\n" + bundle.getString("report.byType") + ":\n";
         for (Pair<String, Integer> typesCount : typesCounts) {
             display += formatPair(typesCount);
         }
@@ -86,7 +86,7 @@ public class Report extends Base implements Initializable {
         try {
             while (rs.next()) {
                 final String month;
-                month = getBundleString(String.format("month.%d", rs.getInt(1)));
+                month = bundle.getString(String.format("month.%d", rs.getInt(1)));
                 monthsCounts.add(new Pair<>(month, rs.getInt(2)));
             }
         } catch (SQLException exception) {
@@ -113,7 +113,7 @@ public class Report extends Base implements Initializable {
                 "JOIN contacts c ON c.Contact_ID = a.Contact_ID " +
                 "ORDER BY Contact_ID, `Start`", this::parseContactsAndAppointments);
 
-        String display = getBundleString("report.byContact") + ":\n";
+        String display = bundle.getString("report.byContact") + ":\n";
         for (Contact contact : contacts) {
             display += "\n";
             display += contact.toReportString();
@@ -160,7 +160,7 @@ public class Report extends Base implements Initializable {
                 "JOIN first_level_divisions d ON d.Division_ID = c.Division_ID " +
                 "ORDER BY d.Division, c.Customer_ID", this::parseCustomersAndDivisions);
 
-        String display = getBundleString("report.three") + ":\n";
+        String display = bundle.getString("report.three") + ":\n";
         for (Division division : divisions) {
             display += "\n";
             display += division.toReportString();

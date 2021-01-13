@@ -44,7 +44,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
             final Field field = tClass.getDeclaredField(fieldName);
             field.setAccessible(true);
             final String key = String.format("%s.%s", tClass.getSimpleName().toLowerCase(), field.getName());
-            final TableColumn<T, String> column = new TableColumn<>(getBundleString(key));
+            final TableColumn<T, String> column = new TableColumn<>(bundle.getString(key));
             column.setCellValueFactory(param -> {
                 try {
                     return new SimpleStringProperty((String) field.get(param.getValue()));
@@ -188,7 +188,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
             if (recordToDelete.getId() == 0) {
                 tableView.getItems().remove(recordToDelete);
                 tableView.refresh();
-                displayAlert(getBundleString("record.deleted.title"), getDeletedMessage(), Alert.AlertType.INFORMATION);
+                displayAlert(bundle.getString("record.deleted.title"), getDeletedMessage(), Alert.AlertType.INFORMATION);
                 emitEvent();
             }
             deleteButton.setDisable(false);

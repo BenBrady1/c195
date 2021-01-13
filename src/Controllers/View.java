@@ -29,7 +29,7 @@ public final class View extends Base {
 //        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Login.fxml"), bundle);
 //        scene.setRoot(loader.load());
 //        loader.<Login>getController().setViewController(this);
-        primaryStage.setTitle(getBundleString("app.title"));
+        primaryStage.setTitle(bundle.getString("app.title"));
 //        primaryStage.setWidth(600);
 //        primaryStage.setHeight(400);
     }

@@ -10,16 +10,18 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.net.URL;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 public class Filter extends Base implements Initializable {
     public class FilterFields {
-        final public String year;
+        final public int year;
         final public String field;
         final public int fieldValue;
 
-        public FilterFields(String year, String field, int fieldValue) {
+        public FilterFields(int year, String field, int fieldValue) {
             this.year = year;
             this.field = field;
             this.fieldValue = fieldValue;
@@ -42,7 +44,7 @@ public class Filter extends Base implements Initializable {
     }
 
     @FXML
-    private TextField yearField;
+    private ComboBox<Integer> yearComboBox;
     @FXML
     private ComboBox<ComboBoxValue> comboBox;
     @FXML
@@ -60,37 +62,82 @@ public class Filter extends Base implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        toggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            String bundleProp;
-            if (newValue == monthButton) {
-                bundleProp = "month";
-                setMonths();
-            } else {
-                bundleProp = "week";
-                setWeeks();
-            }
-            fieldName = bundleProp.toUpperCase();
-            comboBoxLabel.setText(getBundleString(String.format("form.%s", bundleProp)));
-            comboBox.getSelectionModel().selectFirst();
-        });
+        setYears();
+        toggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> updateItems(newValue));
+        yearComboBox.getSelectionModel()
+                .selectedItemProperty()
+                .addListener(((observable, oldValue , newValue) -> updateItems(toggleGroup.getSelectedToggle())));
         toggleGroup.getToggles().addAll(monthButton, weekButton);
         toggleGroup.selectToggle(monthButton);
+    }
+
+    private void updateItems(Toggle newValue) {
+        String bundleProp;
+        if (newValue == monthButton) {
+            bundleProp = "month";
+            setMonths();
+        } else {
+            bundleProp = "week";
+            setWeeks();
+        }
+        fieldName = bundleProp.toUpperCase();
+        comboBoxLabel.setText(bundle.getString(String.format("form.%s", bundleProp)));
+        comboBox.getSelectionModel().selectFirst();
+    }
+
+    private void setYears() {
+        executeQuery("SElECT DISTINCT YEAR(`Start`) FROM appointments ORDER BY YEAR(`Start`)", (ex, rs) -> {
+            if (ex != null) return;
+            final ObservableList<Integer> years = yearComboBox.getItems();
+            try {
+                while (rs.next()) {
+                    years.add(rs.getInt(1));
+                }
+            } catch (SQLException exception) {
+                printSQLException(exception);
+            }
+        });
+        yearComboBox.getSelectionModel().selectFirst();
     }
 
     private void setWeeks() {
         final ObservableList<ComboBoxValue> items = comboBox.getItems();
         items.clear();
-        for (int i = 1; i <= 52; i++) {
-            items.add(new ComboBoxValue(Integer.toString(i), i - 1));
-        }
+        final List<Object> arguments = List.of(yearComboBox.getValue());
+        executeQuery("SELECT DISTINCT WEEK(`Start`) " +
+                "FROM appointments " +
+                "WHERE YEAR(`Start`) = ? " +
+                "ORDER BY WEEK(`Start`)", arguments, (ex, rs) -> {
+            if (ex != null) return;
+            try {
+                while (rs.next()) {
+                    final int week = rs.getInt(1);
+                    items.add(new ComboBoxValue(Integer.toString(week + 1), week));
+                }
+            } catch (SQLException exception) {
+                printSQLException(exception);
+            }
+        });
     }
 
     private void setMonths() {
         final ObservableList<ComboBoxValue> items = comboBox.getItems();
         items.clear();
-        for (int i = 1; i <= 12; i++) {
-            items.add(new ComboBoxValue(getBundleString(String.format("month.%d", i)), i));
-        }
+        final List<Object> arguments = List.of(yearComboBox.getValue());
+        executeQuery("SELECT DISTINCT MONTH(`Start`) " +
+                "FROM appointments " +
+                "WHERE YEAR(`Start`) = ? " +
+                "ORDER BY MONTH(`Start`)", arguments, (ex, rs) -> {
+            if (ex != null) return;
+            try {
+                while (rs.next()) {
+                    final int month = rs.getInt(1);
+                    items.add(new ComboBoxValue(bundle.getString(String.format("month.%d", month)), month));
+                }
+            } catch (SQLException exception) {
+                printSQLException(exception);
+            }
+        });
     }
 
     private void callCallback(FilterFields values) {
@@ -100,18 +147,11 @@ public class Filter extends Base implements Initializable {
 
     @FXML
     private void handleSave(ActionEvent event) {
-        final String year = yearField.getText().trim();
-        if (year.matches("^\\d{4}$")) {
-            final int fieldValue = comboBox.getValue().value;
-            final FilterFields fields = new FilterFields(year, fieldName, fieldValue);
-            callCallback(fields);
-            handleClose(null);
-        } else {
-            final String message = getBundleString("error.is")
-                    .replace("%{field}", getBundleString("form.year"))
-                    .replace("%{issue}", getBundleString("issue.invalid"));
-            displayError(message);
-        }
+        final int year = yearComboBox.getValue();
+        final int fieldValue = comboBox.getValue().value;
+        final FilterFields fields = new FilterFields(year, fieldName, fieldValue);
+        callCallback(fields);
+        handleClose(null);
     }
 
     @FXML
@@ -136,7 +176,7 @@ public class Filter extends Base implements Initializable {
             stage = new Stage();
             stage.setOnHidden(ev -> handleClose(null));
             stage.setScene(scene);
-            stage.setTitle(getBundleString("filter.windowTitle"));
+            stage.setTitle(bundle.getString("filter.windowTitle"));
             stage.setResizable(false);
             stage.showAndWait();
         } catch (Exception ex) {

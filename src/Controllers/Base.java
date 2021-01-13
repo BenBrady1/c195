@@ -35,7 +35,7 @@ abstract public class Base {
             default:
                 locale = new Locale("en", "US");
         }
-//        locale = new Locale("fr", "CA");
+        locale = new Locale("fr", "CA");
         return locale;
     }
 
@@ -241,7 +241,7 @@ abstract public class Base {
      * @see Base#displayError(String, String)
      */
     protected void displayError(Exception ex) {
-        displayError(getBundleString("error.defaultTitle"), ex.getMessage());
+        displayError(bundle.getString("error.defaultTitle"), ex.getMessage());
     }
 
 
@@ -252,7 +252,7 @@ abstract public class Base {
      * @see Base#displayError(String, String)
      */
     protected void displayError(String message) {
-        displayError(getBundleString("error.defaultTitle"), message);
+        displayError(bundle.getString("error.defaultTitle"), message);
     }
 
 
@@ -280,15 +280,5 @@ abstract public class Base {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    protected String getBundleString(String key) {
-        try {
-            return bundle.getString(key);
-        } catch (Exception ex) {
-            System.out.println(String.format("Key not found: %s", key));
-            System.out.println(ex);
-            return "FIX ME";
-        }
     }
 }

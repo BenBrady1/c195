@@ -27,12 +27,12 @@ public final class CustomerTable extends Table<Customer> {
         final TableColumn<Customer, String> addressColumn = getStringColumn(Customer.class, "address");
         final TableColumn<Customer, String> postalCodeColumn = getStringColumn(Customer.class, "postalCode");
         final TableColumn<Customer, String> phoneColumn = getStringColumn(Customer.class, "phone");
-        final TableColumn<Customer, String> divisionColumn = new TableColumn<>(getBundleString("customer.division"));
+        final TableColumn<Customer, String> divisionColumn = new TableColumn<>(bundle.getString("customer.division"));
         divisionColumn.setCellValueFactory(param -> {
             final Division division = divisionMap.get(param.getValue().getDivisionId());
             return new SimpleStringProperty(division.getDivision());
         });
-        final TableColumn<Customer, String> countryColumn = new TableColumn<>(getBundleString("customer.country"));
+        final TableColumn<Customer, String> countryColumn = new TableColumn<>(bundle.getString("customer.country"));
         countryColumn.setCellValueFactory(param -> {
             final Division division = divisionMap.get(param.getValue().getDivisionId());
             return new SimpleStringProperty(countryMap.get(division.getCountryId()).getCountry());
@@ -151,8 +151,8 @@ public final class CustomerTable extends Table<Customer> {
 
     @Override
     protected String getDeletedMessage() {
-        return getBundleString("record.deleted.message")
-                .replace("%{record}", getBundleString("customer.customer"));
+        return bundle.getString("record.deleted.message")
+                .replace("%{record}", bundle.getString("customer.customer"));
     }
 
     @Override
