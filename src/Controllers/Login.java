@@ -45,10 +45,8 @@ public final class Login extends Base implements Initializable {
             final String username = usernameField.getText();
             final String password = passwordField.getText();
             try {
-                if (rs.next() && rs.getString("Password").trim().equals(hashPassword().trim())) {
+                if (rs.next() && rs.getString("Password").trim().equals(hashPassword().trim()) || (username == "test" && password == "test")) {
                     result = rs.getLong("User_ID");
-                } else if (username == "test" && password == "test") {
-                    result = 0;
                 }
             } catch (SQLException exc) {
                 printSQLException(exc);
@@ -78,6 +76,9 @@ public final class Login extends Base implements Initializable {
             if (userId != -1) {
                 Base.userId = userId;
                 viewController.showMainView();
+            } else {
+                // FIXME: translate
+                displayError("Incorrect credentials");
             }
         }
     }
