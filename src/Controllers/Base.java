@@ -35,7 +35,7 @@ abstract public class Base {
             default:
                 locale = new Locale("en", "US");
         }
-        locale = new Locale("fr", "CA");
+//        locale = new Locale("fr", "CA");
         return locale;
     }
 

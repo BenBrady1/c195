@@ -77,6 +77,7 @@ public final class Login extends Base implements Initializable {
             logLoginAttempt(userId != -1);
             if (userId != -1) {
                 Base.userId = Optional.of(userId);
+                viewController.showMainView();
             }
         }
     }
