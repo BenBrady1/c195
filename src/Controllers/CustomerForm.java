@@ -3,7 +3,6 @@ package Controllers;
 import Models.Country;
 import Models.Customer;
 import Models.Division;
-import Models.Record;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,7 +13,6 @@ import javafx.scene.control.TextField;
 import java.net.URL;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public final class CustomerForm extends Form<Customer> implements Initializable {
