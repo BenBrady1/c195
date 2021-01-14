@@ -88,8 +88,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     private void addToDatabase(T record) {
         if (canUpdate(record)) {
             final List<Object> arguments = record.toValues();
-            arguments.add(getUserId());
-            arguments.add(getUserId());
+            arguments.add(userId);
+            arguments.add(userId);
             executeInsert(getInsertStatement(), arguments, (ex, newId) -> {
                 if (ex != null) printSQLException(ex);
                 if (newId != null) record.setId(newId);
@@ -131,7 +131,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     protected void updateInDatabase(T record) {
         if (canUpdate(record)) {
             final List<Object> arguments = record.toValues();
-            arguments.add(getUserId());
+            arguments.add(userId);
             arguments.add(record.getId());
             executeUpdate(getUpdateStatement(), arguments, (ex, updateCount) -> {
                 if (ex != null) printSQLException(ex);

@@ -76,7 +76,7 @@ public final class Login extends Base implements Initializable {
                     "LIMIT 1", arguments, this::validateUsernameAndPassword);
             logLoginAttempt(userId != -1);
             if (userId != -1) {
-                Base.userId = Optional.of(userId);
+                Base.userId = userId;
                 viewController.showMainView();
             }
         }

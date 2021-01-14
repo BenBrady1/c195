@@ -8,7 +8,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.net.URI;
 import java.sql.*;
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
@@ -19,7 +21,7 @@ abstract public class Base {
     private static Locale coercedLocale = coerceLocale();
     protected static ResourceBundle bundle;
     protected static Connection conn;
-    protected static Optional<Long> userId = Optional.ofNullable(null);
+    protected static long userId = 0L;
 
     /**
      * Sets the locale to be used for the duration of the program
@@ -46,17 +48,19 @@ abstract public class Base {
         return coercedLocale;
     }
 
+    /**
+     * @return the resource bundle for usage in other parts of the app
+     */
     public static ResourceBundle getBundle() {
         return bundle;
     }
 
+    /**
+     * sets the locale and resource bundle for the app. they are static for the runtime of the application
+     */
     public static void setLocaleAndBundle() {
         coercedLocale = coerceLocale();
         bundle = ResourceBundle.getBundle("App", getLocale());
-    }
-
-    protected static long getUserId() {
-        return userId.orElse(null);
     }
 
     protected View viewController;
@@ -168,6 +172,14 @@ abstract public class Base {
         }
     }
 
+    /**
+     * a function to insert a new record using the given statement and arguments and clean up any resources after the
+     * callback consumes any exception or result set
+     *
+     * @param query     a SQL statement to execute
+     * @param arguments a list of objects to use as arguments with the query
+     * @param handler   a callback function to consume the exception or result set
+     */
     protected void executeInsert(String query, List<Object> arguments, BiConsumer<SQLException, Long> handler) {
         try (
                 Connection connection = createDatabaseConnection();
@@ -189,6 +201,15 @@ abstract public class Base {
         }
     }
 
+    /**
+     * a wrapper around Base#executeUpdate(String, List, BiFunction) for when the caller does not need to return any
+     * value from the callback
+     *
+     * @param query     a SQL statement to execute
+     * @param arguments a list of objects to use as arguments with the query
+     * @param handler   a callback function to consume the exception or result set
+     * @see Base#executeUpdate(String, List, BiFunction)
+     */
     protected void executeUpdate(String query, List<Object> arguments, BiConsumer<SQLException, Integer> handler) {
         executeUpdate(query, arguments, ((BiFunction<SQLException, Integer, Void>) (ex, updates) -> {
             handler.accept(ex, updates);
@@ -196,6 +217,17 @@ abstract public class Base {
         }));
     }
 
+    /**
+     * a method that executes an update statement with the provided arguments, calls the provided callback with any
+     * exception or result set, and automatically cleans up any resources after the callback returns. additionally,
+     * whatever value is returned from the callback is returned from this function
+     *
+     * @param query     a SQL statement to execute
+     * @param arguments a list of objects to use as arguments with the query
+     * @param handler   a callback function to consume the exception or result set
+     * @param <T>       the type that is returned from the callback
+     * @return whatever value the caller returns from the callback
+     */
     protected <T> T executeUpdate(String query, List<Object> arguments, BiFunction<SQLException, Integer, T> handler) {
         try (
                 Connection connection = createDatabaseConnection();
@@ -211,10 +243,17 @@ abstract public class Base {
         }
     }
 
-    private void setArguments(PreparedStatement stmt, List<Object> arguments) throws SQLException {
+    /**
+     * iterates over a list of objects to use as arguments in a prepared statement
+     *
+     * @param statement the prepared statement that will be executed
+     * @param arguments the arguments to use with the prepared statement
+     * @throws SQLException any exception that occurs when setting the arguments
+     */
+    private void setArguments(PreparedStatement statement, List<Object> arguments) throws SQLException {
         if (arguments != null) {
             for (int i = 0; i < arguments.size(); i++) {
-                stmt.setObject(i + 1, arguments.get(i));
+                statement.setObject(i + 1, arguments.get(i));
             }
         }
     }
@@ -230,6 +269,11 @@ abstract public class Base {
         System.out.println("VendorError: " + ex.getErrorCode());
     }
 
+    /**
+     * a setter method for the view controller used by Main and View
+     *
+     * @param viewController the controller instance
+     */
     protected void setViewController(View viewController) {
         this.viewController = viewController;
     }
