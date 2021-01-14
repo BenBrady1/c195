@@ -15,8 +15,15 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
+/**
+ * controller to filter the appointment table by month or week and year
+ */
 public class Filter extends Base implements Initializable {
-    public class FilterFields {
+    /**
+     * the object that is returned after the filter is applied. it contains the values to be used an arguments for the
+     * query
+     */
+    public static class FilterFields {
         final public int year;
         final public String field;
         final public int fieldValue;
@@ -28,7 +35,11 @@ public class Filter extends Base implements Initializable {
         }
     }
 
-    private class ComboBoxValue {
+    /**
+     * an object to hold ComboBox values. there is an internal value for use in querying and a display value for the
+     * user to interact with
+     */
+    private static class ComboBoxValue {
         final private String display;
         final public int value;
 
@@ -66,11 +77,16 @@ public class Filter extends Base implements Initializable {
         toggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> updateItems(newValue));
         yearComboBox.getSelectionModel()
                 .selectedItemProperty()
-                .addListener(((observable, oldValue , newValue) -> updateItems(toggleGroup.getSelectedToggle())));
+                .addListener(((observable, oldValue, newValue) -> updateItems(toggleGroup.getSelectedToggle())));
         toggleGroup.getToggles().addAll(monthButton, weekButton);
         toggleGroup.selectToggle(monthButton);
     }
 
+    /**
+     * used to populate the month/week ComboBox with the appropriate values for the selected year
+     *
+     * @param newValue the radio button that has been selected
+     */
     private void updateItems(Toggle newValue) {
         String bundleProp;
         if (newValue == monthButton) {
@@ -85,6 +101,10 @@ public class Filter extends Base implements Initializable {
         comboBox.getSelectionModel().selectFirst();
     }
 
+    /**
+     * when the filter window is opened, we query for the distinct list of years that the appointments in the database
+     * have and set them in the year ComboBox
+     */
     private void setYears() {
         executeQuery("SElECT DISTINCT YEAR(`Start`) FROM appointments ORDER BY YEAR(`Start`)", (ex, rs) -> {
             if (ex != null) return;
@@ -100,6 +120,10 @@ public class Filter extends Base implements Initializable {
         yearComboBox.getSelectionModel().selectFirst();
     }
 
+    /**
+     * called when a year is selected in the ComboBox. we get a list of all weeks of that year that have an appointment.
+     * these weeks are then set in the ComboBox
+     */
     private void setWeeks() {
         final ObservableList<ComboBoxValue> items = comboBox.getItems();
         items.clear();
@@ -120,6 +144,10 @@ public class Filter extends Base implements Initializable {
         });
     }
 
+    /**
+     * called when a year is selected in the ComboBox. we get a list of all months of that year that have an
+     * appointment. these months are then set in the ComboBox
+     */
     private void setMonths() {
         final ObservableList<ComboBoxValue> items = comboBox.getItems();
         items.clear();
@@ -140,11 +168,24 @@ public class Filter extends Base implements Initializable {
         });
     }
 
+    /**
+     * calls the passed in callback that actually filters the appointment table, using the FilterFields instance as
+     * the arguments to the statement
+     *
+     * @param values the values to filter by
+     */
     private void callCallback(FilterFields values) {
-        if (callback != null) callback.accept(values);
-        callback = null;
+        if (callback != null) {
+            callback.accept(values);
+            callback = null;
+        }
     }
 
+    /**
+     * applies the filter using the callback from the AppointmentTable controller
+     *
+     * @param event JavaFX action event
+     */
     @FXML
     private void handleSave(ActionEvent event) {
         final int year = yearComboBox.getValue();
@@ -154,6 +195,11 @@ public class Filter extends Base implements Initializable {
         handleClose(null);
     }
 
+    /**
+     * clears any applied filter by passing null to the callback from the AppointmentTable controller
+     *
+     * @param event JavaFX action event
+     */
     @FXML
     private void handleClear(ActionEvent event) {
         callCallback(null);
@@ -161,12 +207,22 @@ public class Filter extends Base implements Initializable {
         toggleGroup.getToggles().clear();
     }
 
+    /**
+     * closes the filter window without applying any filter. called by the cancel button or closing the filter window
+     *
+     * @param event JavaFX action event
+     */
     @FXML
     private void handleClose(ActionEvent event) {
         if (stage != null) stage.close();
         stage = null;
     }
 
+    /**
+     * opens the filter window
+     *
+     * @param callback a method that will execute a sql query with arguments from the FilterFields instance
+     */
     public void openFilterWindow(Consumer<FilterFields> callback) {
         this.callback = callback;
         try {
