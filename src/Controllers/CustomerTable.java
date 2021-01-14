@@ -4,6 +4,7 @@ import Models.Country;
 import Models.Customer;
 import Models.Division;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 
 import java.sql.ResultSet;
@@ -70,14 +71,16 @@ public final class CustomerTable extends Table<Customer> {
             if (ex != null) return;
             try {
                 rs.next();
-                if (rs.getInt("COUNT(*)") != 0) {
-                    // TODO: display notification
-                    System.out.println("UPCOMING APPOINTMENT");
-                }
+                String alertBody;
+                alertBody = rs.getInt("COUNT(*)") != 0
+                        ? bundle.getString("appointment.upcomingAppointment")
+                        : bundle.getString("appointment.noUpcomingAppointment");
+                displayAlert(bundle.getString("appointment.alertTitle"),
+                        alertBody,
+                        Alert.AlertType.INFORMATION);
             } catch (SQLException exception) {
                 printSQLException(exception);
             }
-
         });
     }
 

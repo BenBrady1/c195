@@ -20,6 +20,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
+/**
+ * an abstract class to hold records from the database of the given Record subclass
+ *
+ * @param <T> a subclass of the Record model that implements the Model interface
+ */
 public abstract class Table<T extends Record & Model<T>> extends Base implements Initializable {
     @FXML
     protected TableView<T> tableView;
@@ -37,8 +42,18 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         this.eventEmitter = eventEmitter;
     }
 
+    /**
+     * adds columns to the table that match the shape of the generic T
+     */
     protected abstract void addColumns();
 
+    /**
+     * uses introspection to get all the string fields for the given generic mode T
+     *
+     * @param tClass    the class for T
+     * @param fieldName the name of the instance field
+     * @return the TableColumn for the record
+     */
     protected TableColumn<T, String> getStringColumn(Class<T> tClass, String fieldName) {
         try {
             final Field field = tClass.getDeclaredField(fieldName);
@@ -61,6 +76,10 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         return null;
     }
 
+    /**
+     * implemented by subclasses to populate the table with the data and build any maps might be necessary to properly
+     * display foreign key columns
+     */
     protected abstract void populateData();
 
     @Override
@@ -75,14 +94,23 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         tableView.refresh();
     }
 
-    private void openForm(FormFactory.Type type, T record, Form.Mode mode, Consumer<T> callback) {
-        formController = formFactory.getInstance(type);
-        formController.open(record, mode, callback);
+    /**
+     * opens a form in the proper mode with the given record
+     *
+     * @param mode
+     * @param record
+     * @param callback
+     */
+    private void openForm(FormFactory.Mode mode, T record, Consumer<T> callback) {
+        formController = formFactory.getInstance(mode, record, callback);
+        formController.open();
+        System.out.println("here");
     }
 
     private void finalizeAction() {
         tableView.refresh();
         formController = null;
+        System.out.println("here");
     }
 
     private void addToDatabase(T record) {
@@ -104,7 +132,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     @FXML
     private void addRecord() {
         if (formController == null) {
-            openForm(FormFactory.Type.Create, getNewRecord(), Form.Mode.Create, (newRecord) -> {
+            openForm(FormFactory.Mode.Create, getNewRecord(), (newRecord) -> {
                 if (newRecord != null) {
                     addToDatabase(newRecord);
                     if (newRecord.getId() != 0) {
@@ -124,7 +152,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     private void viewRecord() {
         final T selected = getSelectedRecord();
         if (selected != null && formController == null) {
-            openForm(FormFactory.Type.Read, selected, Form.Mode.Read, (record) -> finalizeAction());
+            openForm(FormFactory.Mode.Read, selected, (record) -> finalizeAction());
         }
     }
 
@@ -148,7 +176,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     private void editRecord() {
         final T selected = getSelectedRecord();
         if (selected != null && formController == null) {
-            openForm(FormFactory.Type.Update, selected.copy(), Form.Mode.Update, (updatedRecord) -> {
+            openForm(FormFactory.Mode.Update, selected.copy(), (updatedRecord) -> {
                 if (updatedRecord != null) updateInDatabase(updatedRecord);
                 finalizeAction();
             });

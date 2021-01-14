@@ -1,23 +1,24 @@
 package Controllers;
 
+import Models.Appointment;
 import Models.Contact;
 import Models.Customer;
-import Models.Record;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-public class AppointmentFormFactory extends FormFactory<AppointmentForm> {
+public class AppointmentFormFactory extends FormFactory<Appointment, AppointmentForm> {
     private Map<Long, Contact> contactMap;
     private List<Customer> customers;
 
-    public <M extends Record> AppointmentFormFactory(Class<M> modelClass) {
+    public AppointmentFormFactory(Class<Appointment> modelClass) {
         super(modelClass);
     }
 
     @Override
-    public AppointmentForm getInstance(Type type) {
-        return new AppointmentForm(getTitle(type), contactMap, customers);
+    public AppointmentForm getInstance(Mode mode, Appointment record, Consumer<Appointment> callback) {
+        return new AppointmentForm(getTitle(mode), contactMap, customers, mode, record, callback);
     }
 
     public void setContactMap(Map<Long, Contact> contactMap) {

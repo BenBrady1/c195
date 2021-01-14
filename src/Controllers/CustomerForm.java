@@ -14,6 +14,7 @@ import java.net.URL;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public final class CustomerForm extends Form<Customer> implements Initializable {
     @FXML
@@ -32,8 +33,13 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
     private final Map<Long, Country> countryMap;
     private final Map<Long, Division> divisionMap;
 
-    public CustomerForm(String windowTitle, Map<Long, Division> divisionMap, Map<Long, Country> countryMap) {
-        super(windowTitle);
+    public CustomerForm(String windowTitle,
+                        Map<Long, Division> divisionMap,
+                        Map<Long, Country> countryMap,
+                        FormFactory.Mode mode,
+                        Customer record,
+                        Consumer<Customer> callback) {
+        super(windowTitle, mode, record, callback);
         this.divisionMap = divisionMap;
         this.countryMap = countryMap;
     }
@@ -52,6 +58,9 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
         super.initialize(url, resourceBundle);
     }
 
+    /**
+     * @see Form#setFields()
+     */
     @Override
     protected void setFields() {
         final Division division = divisionMap.get(record.getDivisionId());
@@ -61,6 +70,9 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
         divisionComboBox.getSelectionModel().select(division);
     }
 
+    /**
+     * @see Form#getResourceURL()
+     */
     @Override
     protected String getResourceURL() {
         return "/Views/CustomerForm.fxml";
@@ -78,16 +90,25 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
         divisions.sort(Comparator.comparing(Division::getDivision));
     }
 
+    /**
+     * @see Form#applyOtherFieldsToRecord()
+     */
     @Override
     protected void applyOtherFieldsToRecord() {
         record.setDivisionId(getRecordId(divisionComboBox.getValue()));
     }
 
+    /**
+     * @see Form#getHeight()
+     */
     @Override
     protected double getHeight() {
         return 400;
     }
 
+    /**
+     * @see Form#getWidth()
+     */
     @Override
     protected double getWidth() {
         return 400;

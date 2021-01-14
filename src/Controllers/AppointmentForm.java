@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class AppointmentForm extends Form<Appointment> {
     @FXML
@@ -56,8 +57,13 @@ public class AppointmentForm extends Form<Appointment> {
             .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
             .matches("^23.+00$");
 
-    public AppointmentForm(String windowTitle, Map<Long, Contact> contactMap, List<Customer> customers) {
-        super(windowTitle);
+    public AppointmentForm(String windowTitle,
+                           Map<Long, Contact> contactMap,
+                           List<Customer> customers,
+                           FormFactory.Mode mode,
+                           Appointment record,
+                           Consumer<Appointment> callback) {
+        super(windowTitle, mode, record, callback);
         this.contactMap = contactMap;
         for (Customer customer : customers) {
             customerMap.put(customer.getId(), customer);
@@ -73,6 +79,9 @@ public class AppointmentForm extends Form<Appointment> {
         super.initialize(url, resourceBundle);
     }
 
+    /**
+     * @see Form#applyOtherFieldsToRecord()
+     */
     @Override
     protected void applyOtherFieldsToRecord() {
         final LocalDateTime start = parseDateTime(startDatePicker, startHourPicker, startMinutePicker, startMeridiemPicker);
@@ -84,6 +93,9 @@ public class AppointmentForm extends Form<Appointment> {
         record.setContactId(getRecordId(contactComboBox.getValue()));
     }
 
+    /**
+     * @see Form#setFields()
+     */
     @Override
     protected void setFields() {
         setComboBoxFromMap(contactComboBox, contactMap, record.getContactId());
@@ -98,6 +110,15 @@ public class AppointmentForm extends Form<Appointment> {
         comboBox.setDisable(readOnly);
     }
 
+    /**
+     * sets the date and time fields from the ZonedDateTime object
+     *
+     * @param date           the object that holds the date and time
+     * @param datePicker     a date picker for the date
+     * @param hourPicker     a ComboBox for the hour
+     * @param minutePicker   a ComboBox for the minute
+     * @param meridiemPicker a ComboBox for am/pm
+     */
     private void setDateFields(ZonedDateTime date,
                                DatePicker datePicker,
                                ComboBox<String> hourPicker,
@@ -118,21 +139,33 @@ public class AppointmentForm extends Form<Appointment> {
         datePicker.setDisable(readOnly);
     }
 
+    /**
+     * @see Form#getResourceURL()
+     */
     @Override
     protected String getResourceURL() {
         return "/Views/AppointmentForm.fxml";
     }
 
+    /**
+     * @see Form#getWidth()
+     */
     @Override
     protected double getWidth() {
         return 600;
     }
 
+    /**
+     * @see Form#getHeight()
+     */
     @Override
     protected double getHeight() {
         return 540;
     }
 
+    /**
+     * fills the date fields with all necessary options to choose a start/end date and time
+     */
     private void initializeDateFields() {
         ComboBox[] meridiemPickers = {endMeridiemPicker, startMeridiemPicker};
         for (ComboBox<String> meridiemPicker : meridiemPickers) {
@@ -176,6 +209,9 @@ public class AppointmentForm extends Form<Appointment> {
         }
     }
 
+    /**
+     * creates a map of User Id => User object for easy lookup
+     */
     private void buildUserMap() {
         executeQuery("SELECT User_ID, User_Name FROM users", (ex, rs) -> {
             if (ex != null) return;
@@ -191,6 +227,15 @@ public class AppointmentForm extends Form<Appointment> {
         userComboBox.getItems().addAll(userMap.values());
     }
 
+    /**
+     * parses a LocalDateTime out of the fields that make up the date/time info
+     *
+     * @param datePicker     a date picker for the date
+     * @param hourPicker     a ComboBox for the hour
+     * @param minutePicker   a ComboBox for the minute
+     * @param meridiemPicker a ComboBox for am/pm
+     * @return the LocalDateTime contained by the various form elements
+     */
     private LocalDateTime parseDateTime(DatePicker datePicker,
                                         ComboBox<String> hourPicker,
                                         ComboBox<String> minutePicker,

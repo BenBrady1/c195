@@ -2,22 +2,44 @@ package Controllers;
 
 import Models.Record;
 
-public abstract class FormFactory<T extends Form> extends Base {
-    private final Class<? extends Record> modelClass;
+import java.util.function.Consumer;
 
-    enum Type {
+/**
+ * Instantiates a form controller of type T for model R
+ *
+ * @param <R> a Record subclass
+ * @param <T> a Form subclass
+ */
+public abstract class FormFactory<R extends Record, T extends Form<R>> extends Base {
+    private final Class<R> modelClass;
+
+    enum Mode {
         Create,
         Read,
         Update
     }
 
-    public <M extends Record> FormFactory(Class<M> modelClass) {
+    public FormFactory(Class<R> modelClass) {
         this.modelClass = modelClass;
     }
 
-    protected String getTitle(Type type) {
-        return bundle.getString(String.format("form.%s.%s", type.toString().toLowerCase(), modelClass.getSimpleName().toLowerCase()));
+    /**
+     * gets the correct string from the bundle based off the class name and the form mode
+     *
+     * @param mode the mode the form opens in
+     * @return the title for the form window
+     */
+    protected String getTitle(Mode mode) {
+        return bundle.getString(String.format("form.%s.%s", mode.toString().toLowerCase(), modelClass.getSimpleName().toLowerCase()));
     }
 
-    abstract public T getInstance(FormFactory.Type type);
+    /**
+     * Returns an instance of the Form for the Record
+     *
+     * @param mode     the mode to open the form in
+     * @param record   the record to create/read/update
+     * @param callback the callback that will act on the record after editing has finished
+     * @return the form controller instance
+     */
+    abstract public T getInstance(Mode mode, R record, Consumer<R> callback);
 }

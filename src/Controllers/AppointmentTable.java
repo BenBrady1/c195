@@ -13,13 +13,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public class AppointmentTable extends Table<Appointment> implements Initializable {
+public final class AppointmentTable extends Table<Appointment> implements Initializable {
     private Filter filterController = new Filter();
 
     private HashMap<Long, Contact> contactMap = new HashMap<>();
 
     private ObservableList<Customer> customers;
-    final private String selectQuery = "SELECT Appointment_ID, Title, Description, `Location`, `Type`, `Start`, `End`, Customer_ID, User_ID, Contact_ID " +
+    private final String selectQuery = "SELECT Appointment_ID, Title, Description, `Location`, `Type`, `Start`, `End`, Customer_ID, User_ID, Contact_ID " +
             "FROM appointments";
 
     public AppointmentTable(ObservableList<Customer> customers, Main.EventEmitter eventEmitter) {
@@ -55,14 +55,14 @@ public class AppointmentTable extends Table<Appointment> implements Initializabl
                 getStringColumn(Appointment.class, "description"),
                 getStringColumn(Appointment.class, "location"),
                 contactCol,
-                getStringColumn(Appointment.class, "type"),
+                getStringColumn(Appointment.class, "mode"),
                 startCol,
                 endCol,
                 customerIdCol);
     }
 
     @Override
-    protected void populateData() {
+    protected final void populateData() {
         executeQuery(selectQuery, this::parseAppointments);
         executeQuery("SELECT * FROM contacts", this::buildContactMap);
     }

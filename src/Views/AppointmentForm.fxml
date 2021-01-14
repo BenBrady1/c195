@@ -44,7 +44,7 @@
             <Label layoutX="258.0" layoutY="79.0" text="%appointment.title"/>
             <Label layoutX="258.0" layoutY="114.0" text="%appointment.description"/>
             <Label layoutX="258.0" layoutY="149.0" text="%appointment.location"/>
-            <Label layoutX="258.0" layoutY="184.0" text="%appointment.type"/>
+            <Label layoutX="258.0" layoutY="184.0" text="%appointment.mode"/>
             <Label layoutX="126.0" layoutY="221.0" text="%appointment.start"/>
             <Label layoutX="126.0" layoutY="254.0" text="%appointment.end"/>
             <Label layoutX="258.0" layoutY="324.0" text="%appointment.customerId"/>

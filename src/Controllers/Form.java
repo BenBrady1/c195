@@ -33,32 +33,27 @@ public abstract class Form<T extends Record> extends Base implements Initializab
     @FXML
     private ButtonBar buttonBar;
 
-    /**
-     * the modes in which a form can operate
-     */
-    public enum Mode {
-        Create,
-        Read,
-        Update
-    }
-
+    private FormFactory.Mode mode;
     protected T record;
-    protected Mode mode;
     protected boolean readOnly = true;
     protected Consumer<T> callback;
     private Stage stage;
     private final String windowTitle;
 
-    public Form(String windowTitle) {
+    public Form(String windowTitle, FormFactory.Mode mode, T record, Consumer<T> callback) {
         this.windowTitle = windowTitle;
+        readOnly = mode == FormFactory.Mode.Read;
+        this.mode = mode;
+        this.record = record;
+        this.callback = callback;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         if (record.getId() != 0) idField.setText(Long.toString(record.getId()));
         idField.setDisable(true);
-        if (mode != Mode.Create) {
-            if (mode == Mode.Read) {
+        if (mode != FormFactory.Mode.Create.Create) {
+            if (mode == FormFactory.Mode.Read) {
                 buttonBar.setVisible(false);
             }
             setFields();
@@ -67,19 +62,11 @@ public abstract class Form<T extends Record> extends Base implements Initializab
     }
 
     /**
-     * Opens a form to create/view/update a record. the consumer lambda allows for the record to be asynchronously saved
-     * and for the form to be cleaned up after the user is finished editing
-     *
-     * @param record   the record, an appointment or customer record
-     * @param mode     new/view/update depending on the action
-     * @param callback a function to be called with the record after the user clicks the save button
+     * Opens a form to create/view/update a record
      */
-    public void open(T record, Mode mode, Consumer<T> callback) {
-        this.record = record;
-        this.mode = mode;
-        readOnly = mode == Mode.Read;
-        this.callback = callback;
+    public Form<T> open() {
         openForm();
+        return this;
     }
 
     /**
@@ -90,16 +77,15 @@ public abstract class Form<T extends Record> extends Base implements Initializab
      */
     private void callCallback(T record) {
         if (callback != null) {
-            final Consumer<T> localCallback = callback;
+            callback.accept(record);
             callback = null;
-            localCallback.accept(record);
         }
     }
 
     /**
      * handles all the actions required for saving a record to the DB. the flow is:
      * 1. apply values from form to record
-     * 2. validate that the record has valid values
+     * 2. callback that the record has valid values
      * 3. call the callback with the record
      * 4. close the form
      */
@@ -202,7 +188,7 @@ public abstract class Form<T extends Record> extends Base implements Initializab
 
     /**
      * uses #iterateStringFields to set values from the record to the form
-     * 
+     *
      * @see Form#iterateStringFields(BiConsumer)
      */
     private void setTextFields() {
@@ -252,7 +238,6 @@ public abstract class Form<T extends Record> extends Base implements Initializab
      * the matching pairs for further processing
      *
      * @param callback a lambda expression for processing the TextField and its matching member in the record
-     *
      * @see Form#applyStringFormFieldsToRecord()
      * @see Form#setTextFields()
      */
