@@ -55,7 +55,7 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
                 getStringColumn(Appointment.class, "description"),
                 getStringColumn(Appointment.class, "location"),
                 contactCol,
-                getStringColumn(Appointment.class, "mode"),
+                getStringColumn(Appointment.class, "type"),
                 startCol,
                 endCol,
                 customerIdCol);

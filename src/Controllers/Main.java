@@ -15,9 +15,18 @@ public class Main extends Base implements Initializable {
         CustomerDeleted
     }
 
+    /**
+     * event emitter class. used by customer table to alert the appointment table of a customer deletion so the
+     * deleted appointments can be removed from the table
+     */
     final public class EventEmitter implements java.util.EventListener {
         final private HashMap<Event, List<Runnable>> eventMap = new HashMap<>();
 
+        /**
+         * registers an event listener
+         * @param e the event to listen to
+         * @param r a callback for when the event happens
+         */
         public void addListener(Event e, Runnable r) {
             List<Runnable> listeners = eventMap.get(e);
             if (listeners == null) {
@@ -27,6 +36,10 @@ public class Main extends Base implements Initializable {
             listeners.add(r);
         }
 
+        /**
+         * calls all registered event listeners for the emitted event
+         * @param e the event that happened
+         */
         public void emit(Event e) {
             for (Runnable runnable : eventMap.get(e)) {
                 runnable.run();
@@ -50,12 +63,16 @@ public class Main extends Base implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // lambda to easily determine which tab has been selected and display the correct data
-        tabPane.getSelectionModel().selectedItemProperty().addListener(((observableValue, oldTab, newTab) -> {
-            populateData(newTab);
-        }));
+        tabPane.getSelectionModel().selectedItemProperty()
+                .addListener(((observableValue, oldTab, newTab) -> populateData(newTab)));
         populateData(tabPane.getSelectionModel().getSelectedItem());
     }
 
+    /**
+     * is called whenever the tab on the main view changes, it makes sure that all the tabs are initialized
+     *
+     * @param newTab the currently selected tab
+     */
     private void populateData(Tab newTab) {
         if (newTab == customerTab) {
             populateCustomerData();
@@ -64,6 +81,9 @@ public class Main extends Base implements Initializable {
         }
     }
 
+    /**
+     * creates the customer table if it's not already initialized
+     */
     private void populateCustomerData() {
         if (customerTabInitialized) return;
         customerTabInitialized = true;
@@ -78,6 +98,9 @@ public class Main extends Base implements Initializable {
         }
     }
 
+    /**
+     * creates the appointment table if it's not already initialized
+     */
     private void populateAppointmentData() {
         if (appointmentTabInitialized) return;
         appointmentTabInitialized = true;
