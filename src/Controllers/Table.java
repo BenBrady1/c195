@@ -97,22 +97,29 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     /**
      * opens a form in the proper mode with the given record
      *
-     * @param mode
-     * @param record
-     * @param callback
+     * @param mode     the mode for the form
+     * @param record   the record to display in the form
+     * @param callback the callback to consume the record after editing has finished
      */
     private void openForm(FormFactory.Mode mode, T record, Consumer<T> callback) {
         formController = formFactory.getInstance(mode, record, callback);
         formController.open();
-        System.out.println("here");
     }
 
+    /**
+     * refreshes the table view and sets the formController null after it is closed. only one form can be opened at a
+     * time
+     */
     private void finalizeAction() {
         tableView.refresh();
         formController = null;
-        System.out.println("here");
     }
 
+    /**
+     * executes a SQL insert statement for the given record
+     *
+     * @param record the record to insert
+     */
     private void addToDatabase(T record) {
         if (canUpdate(record)) {
             final List<Object> arguments = record.toValues();
@@ -125,10 +132,19 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         }
     }
 
+    /**
+     * @return a string with SQL insert statement for a record
+     */
     protected abstract String getInsertStatement();
 
+    /**
+     * @return a blank record to use to hold the data for a new record before it is saved to the databases
+     */
     protected abstract T getNewRecord();
 
+    /**
+     * opens the form with a blank record and saves it into the database
+     */
     @FXML
     private void addRecord() {
         if (formController == null) {
@@ -148,6 +164,9 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         return tableView.getSelectionModel().getSelectedItem();
     }
 
+    /**
+     * opens the selected record in view mode
+     */
     @FXML
     private void viewRecord() {
         final T selected = getSelectedRecord();
@@ -156,6 +175,11 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         }
     }
 
+    /**
+     * opens the edit form and saves the changes to the database
+     *
+     * @param record the record to update
+     */
     protected void updateInDatabase(T record) {
         if (canUpdate(record)) {
             final List<Object> arguments = record.toValues();
@@ -168,10 +192,22 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         }
     }
 
+    /**
+     * performs SQL validations on the record to ensure it is valid
+     *
+     * @param record the record to update
+     * @return whether the record can be updated
+     */
     protected abstract boolean canUpdate(T record);
 
+    /**
+     * @return a string that contains a SQL statement to update a record
+     */
     protected abstract String getUpdateStatement();
 
+    /**
+     * opens the form with the given record and executes a SQL statement to update a record in the database
+     */
     @FXML
     private void editRecord() {
         final T selected = getSelectedRecord();
@@ -183,6 +219,12 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         }
     }
 
+    /**
+     * takes a list of arguments and converts it into a list of objects
+     *
+     * @param values the values to include in the list
+     * @return a list of the values
+     */
     protected List<Object> toArray(Object... values) {
         final List<Object> output = new ArrayList<>();
         if (values != null) {
@@ -194,6 +236,11 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         return output;
     }
 
+    /**
+     * executes a SQL statement to delete a record from the database
+     *
+     * @param record the record delete
+     */
     protected void deleteFromDatabase(T record) {
         if (deleteDependencies(record)) {
             executeUpdate(getDeleteStatement(), toArray(record.getId()), (ex, updates) -> {
@@ -203,8 +250,17 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         }
     }
 
+    /**
+     * Deletes dependencies for the given record. called before attempting to delete the given record
+     *
+     * @param record the record whose dependencies need to be deleted
+     * @return whether the dependent records could be deleted successfully
+     */
     protected abstract boolean deleteDependencies(T record);
 
+    /**
+     * @return a SQL statement that can delete a record from a table
+     */
     protected abstract String getDeleteStatement();
 
     @FXML
@@ -228,10 +284,14 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
 
     protected abstract String getDeletedMessage();
 
+
     public ObservableList<T> getData() {
         return tableView.getItems();
     }
 
+    /**
+     * adds a filter to the table, only used by the AppointmentTable
+     */
     @FXML
     protected void addFilter() {
     }
