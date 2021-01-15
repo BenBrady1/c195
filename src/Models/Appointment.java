@@ -185,11 +185,10 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
         checkDateRange(startEST, bundle.getString("appointment.start"));
         checkDateRange(endEST, bundle.getString("appointment.end"));
         if (start.compareTo(end) > 0) {
-            // FIXME: translate
-            throw new ValidationError("start comes after end");
+            throw new ValidationError(bundle.getString("error.startAfterEnd"));
         }
         if (!startEST.toLocalDate().equals(endEST.toLocalDate())) {
-            throw new ValidationError("should be same day");
+            throw new ValidationError(bundle.getString("error.notSameDay"));
         }
     }
 
@@ -202,8 +201,7 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
      */
     private void checkDateRange(ZonedDateTime date, String name) throws ValidationError {
         if (date.getHour() < 8 || date.getHour() > 22 || (date.getHour() == 22 && date.getMinute() != 0)) {
-            // FIXME: translate
-            throw new ValidationError(String.format("%s outside range", name));
+            throw new ValidationError(bundle.getString("error.invalidDateRange").replace("%{field}", name));
         }
     }
 

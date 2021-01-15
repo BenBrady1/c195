@@ -45,7 +45,7 @@ public final class Login extends Base implements Initializable {
             final String username = usernameField.getText();
             final String password = passwordField.getText();
             try {
-                if (rs.next() && rs.getString("Password").trim().equals(hashPassword().trim()) || (username == "test" && password == "test")) {
+                if (rs.next() && (rs.getString("Password").trim().equals(hashPassword().trim()) || (username == "test" && password == "test"))) {
                     result = rs.getLong("User_ID");
                 }
             } catch (SQLException exc) {
@@ -77,8 +77,7 @@ public final class Login extends Base implements Initializable {
                 Base.userId = userId;
                 viewController.showMainView();
             } else {
-                // FIXME: translate
-                displayError("Incorrect credentials");
+                displayError(bundle.getString("error.invalidCredentials"));
             }
         }
     }
