@@ -3,6 +3,7 @@ package Controllers;
 import Models.*;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
@@ -26,7 +27,7 @@ public class AppointmentForm extends Form<Appointment> {
     @FXML
     private ComboBox<String> startMinutePicker;
     @FXML
-    private ComboBox<String> startMeridiemPicker;
+    private ChoiceBox<String> startMeridiemPicker;
     @FXML
     private DatePicker endDatePicker;
     @FXML
@@ -34,7 +35,7 @@ public class AppointmentForm extends Form<Appointment> {
     @FXML
     private ComboBox<String> endMinutePicker;
     @FXML
-    private ComboBox<String> endMeridiemPicker;
+    private ChoiceBox<String> endMeridiemPicker;
     @FXML
     private ComboBox<Contact> contactComboBox;
     @FXML
@@ -117,13 +118,13 @@ public class AppointmentForm extends Form<Appointment> {
      * @param datePicker     a date picker for the date
      * @param hourPicker     a ComboBox for the hour
      * @param minutePicker   a ComboBox for the minute
-     * @param meridiemPicker a ComboBox for am/pm
+     * @param meridiemPicker a ChoiceBox for am/pm
      */
     private void setDateFields(ZonedDateTime date,
                                DatePicker datePicker,
                                ComboBox<String> hourPicker,
                                ComboBox<String> minutePicker,
-                               ComboBox<String> meridiemPicker) {
+                               ChoiceBox<String> meridiemPicker) {
         if (use24HourTime) {
             hourPicker.setValue(String.format("%02d", date.getHour()));
         } else {
@@ -167,8 +168,8 @@ public class AppointmentForm extends Form<Appointment> {
      * fills the date fields with all necessary options to choose a start/end date and time
      */
     private void initializeDateFields() {
-        ComboBox[] meridiemPickers = {endMeridiemPicker, startMeridiemPicker};
-        for (ComboBox<String> meridiemPicker : meridiemPickers) {
+        ChoiceBox[] meridiemPickers = {endMeridiemPicker, startMeridiemPicker};
+        for (ChoiceBox<String> meridiemPicker : meridiemPickers) {
             if (use24HourTime) {
                 meridiemPicker.setDisable(true);
                 meridiemPicker.setVisible(false);
@@ -234,13 +235,13 @@ public class AppointmentForm extends Form<Appointment> {
      * @param datePicker     a date picker for the date
      * @param hourPicker     a ComboBox for the hour
      * @param minutePicker   a ComboBox for the minute
-     * @param meridiemPicker a ComboBox for am/pm
+     * @param meridiemPicker a ChoiceBox for am/pm
      * @return the LocalDateTime contained by the various form elements
      */
     private LocalDateTime parseDateTime(DatePicker datePicker,
                                         ComboBox<String> hourPicker,
                                         ComboBox<String> minutePicker,
-                                        ComboBox<String> meridiemPicker) {
+                                        ChoiceBox<String> meridiemPicker) {
         int hour = hourPicker.getSelectionModel().getSelectedIndex();
         if (!use24HourTime) {
             hour += (meridiemPicker.getSelectionModel().getSelectedItem() == "am" ? 0 : 12);

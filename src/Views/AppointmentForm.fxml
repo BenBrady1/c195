@@ -31,11 +31,11 @@
             <DatePicker fx:id="startDatePicker" layoutX="192.0" layoutY="215.0"/>
             <ComboBox fx:id="startHourPicker" layoutX="373.0" layoutY="215.0" prefHeight="25.0" prefWidth="66.0"/>
             <ComboBox fx:id="startMinutePicker" layoutX="456.0" layoutY="215.0" prefHeight="25.0" prefWidth="66.0"/>
-            <ComboBox fx:id="startMeridiemPicker" layoutX="530.0" layoutY="215.0" prefHeight="25.0" prefWidth="27.0"/>
+            <ChoiceBox fx:id="startMeridiemPicker" layoutX="530.0" layoutY="215.0" prefHeight="25.0" prefWidth="27.0"/>
             <DatePicker fx:id="endDatePicker" layoutX="192.0" layoutY="250.0"/>
             <ComboBox fx:id="endHourPicker" layoutX="373.0" layoutY="250.0" prefHeight="25.0" prefWidth="66.0"/>
             <ComboBox fx:id="endMinutePicker" layoutX="456.0" layoutY="250.0" prefHeight="25.0" prefWidth="66.0"/>
-            <ComboBox fx:id="endMeridiemPicker" layoutX="530.0" layoutY="250.0" prefHeight="25.0" prefWidth="27.0"/>
+            <ChoiceBox fx:id="endMeridiemPicker" layoutX="530.0" layoutY="250.0" prefHeight="25.0" prefWidth="27.0"/>
             <ComboBox fx:id="contactComboBox" layoutX="372.0" layoutY="285.0" prefWidth="150.0"/>
             <ComboBox fx:id="customerComboBox" layoutX="372.0" layoutY="320.0" prefWidth="150.0"/>
             <ComboBox fx:id="userComboBox" layoutX="372.0" layoutY="355.0" prefWidth="150.0"/>
