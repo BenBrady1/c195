@@ -119,6 +119,18 @@ abstract public class Base {
     }
 
     /**
+     * A wrapper around Base#executeQuery(String, Object[], BiFunction) for when there are no arguments and a value is
+     * needed from the callback function
+     *
+     * @param query   the query to execute
+     * @param handler a function to handle any errors or result sets from the query
+     * @see Base#executeQuery(String, List, BiFunction)
+     */
+    protected <T> T executeQuery(String query, BiFunction<SQLException, ResultSet, T> handler) {
+        return executeQuery(query, null, (ex, rs) -> (T) handler.apply(ex, rs));
+    }
+
+    /**
      * A wrapper around Base#executeQuery(String, Object[], BiFunction) for when there are no arguments and no value is
      * needed from the callback function
      *

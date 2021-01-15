@@ -19,6 +19,6 @@
         </ButtonBar>
     </bottom>
     <center>
-        <TextArea fx:id="textArea"/>
+        <TextArea fx:id="textArea" editable="false"/>
     </center>
 </BorderPane>

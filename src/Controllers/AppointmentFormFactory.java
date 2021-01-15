@@ -3,6 +3,7 @@ package Controllers;
 import Models.Appointment;
 import Models.Contact;
 import Models.Customer;
+import Models.Record;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,9 @@ public class AppointmentFormFactory extends FormFactory<Appointment, Appointment
         super(modelClass);
     }
 
+    /**
+     * @see FormFactory#getInstance(Mode, Record, Consumer) 
+     */
     @Override
     public AppointmentForm getInstance(Mode mode, Appointment record, Consumer<Appointment> callback) {
         return new AppointmentForm(getTitle(mode), contactMap, customers, mode, record, callback);
