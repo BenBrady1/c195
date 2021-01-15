@@ -12,6 +12,11 @@ final public class User extends Record {
         return name;
     }
 
+    /**
+     * overrides built-in toString() for display in a ComboBox
+     *
+     * @return the name of the user
+     */
     @Override
     public String toString() {
         return name;

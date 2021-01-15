@@ -39,11 +39,17 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
         this.contactId = contactId;
     }
 
+    /**
+     * @see Model#copy()
+     */
     @Override
     public Appointment copy() {
         return new Appointment(id, title, description, location, type, start, end, customerId, userId, contactId);
     }
 
+    /**
+     * @see Model#toValues()
+     */
     @Override
     public List<Object> toValues() {
         return new ArrayList(List.of(title,
@@ -65,22 +71,6 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
         this.title = title.trim();
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description.trim();
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location.trim();
-    }
-
     public String getType() {
         return type;
     }
@@ -89,16 +79,8 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
         this.type = type.trim();
     }
 
-    public LocalDateTime getStart() {
-        return start;
-    }
-
     public void setStart(LocalDateTime start) {
         this.start = start;
-    }
-
-    public LocalDateTime getEnd() {
-        return end;
     }
 
     public void setEnd(LocalDateTime end) {
@@ -129,40 +111,73 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
         this.contactId = contactId;
     }
 
+    /**
+     * @return the start date formatted for a sql query
+     */
     public String getSQLStart() {
         return formatSQLDate(start);
     }
 
+    /**
+     * @return the end date formatted for a sql query
+     */
     public String getSQLEnd() {
         return formatSQLDate(end);
     }
 
+    /**
+     * formats a date for sql queries
+     *
+     * @param date the date to format
+     * @return the string for the sql query
+     */
     private String formatSQLDate(LocalDateTime date) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return formatter.format(date.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")));
     }
 
+    /**
+     * @return the start date formatted for display in the table
+     */
     public String getFormattedStart() {
         return formatLocalDate(start);
     }
 
+    /**
+     * @return the end date formatted for display in the table
+     */
     public String getFormattedEnd() {
         return formatLocalDate(end);
     }
 
+    /**
+     * formats a date for display in the table
+     *
+     * @param date the date to format
+     * @return the string to display
+     */
     private String formatLocalDate(LocalDateTime date) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale);
         return date.format(formatter);
     }
 
+    /**
+     * @return the start time in the local user's time zone
+     */
     public ZonedDateTime getLocalStart() {
         return start.atZone(ZoneId.systemDefault());
     }
 
+    /**
+     * @return the end time in the local user's time zone
+     */
     public ZonedDateTime getLocalEnd() {
         return end.atZone(ZoneId.systemDefault());
     }
 
+    /**
+     * @see Record#customValidate()
+     */
     @Override
     protected void customValidate() throws ValidationError {
         final ZonedDateTime startEST = start.atZone(ZoneId.of("US/Eastern"));
@@ -178,6 +193,13 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
         }
     }
 
+    /**
+     * validates that the record's hours fall within business hours
+     *
+     * @param date the start or end date and time
+     * @param name the name of the field
+     * @throws ValidationError
+     */
     private void checkDateRange(ZonedDateTime date, String name) throws ValidationError {
         if (date.getHour() < 8 || date.getHour() > 22 || (date.getHour() == 22 && date.getMinute() != 0)) {
             // FIXME: translate
@@ -185,6 +207,10 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
         }
     }
 
+    /**
+     * @see Reportable#toReportString()
+     */
+    @Override
     public String toReportString() {
         //  appointment ID, title, type and description, start date and time, end date and time, and customer ID
         String output = "";

@@ -8,6 +8,12 @@ public interface Model<T> {
 
     List<Object> toValues();
 
+    /**
+     * copies fields from one instance of the record to this one
+     *
+     * @param other another instance of the class
+     * @return this
+     */
     default T applyChanges(T other) {
         for (Field declaredField : getClass().getDeclaredFields()) {
             declaredField.setAccessible(true);

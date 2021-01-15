@@ -2,11 +2,8 @@ package Models;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public abstract class Record {
     public static ResourceBundle bundle;
@@ -32,28 +29,37 @@ public abstract class Record {
         this.id = id;
     }
 
-    private String getErrorMessage(String field, String issueName) {
+    /**
+     * gets error message content telling user that the field cannot be empty
+     *
+     * @param field the field that is empty
+     * @return the message for the error window
+     */
+    private String getEmptyErrorMessage(String field) {
         final String key = String.format("%s.%s", getClass().getSimpleName().toLowerCase(), field);
         final String title = bundle.getString(key);
-        final String issue = bundle.getString(String.format("issue.%s", issueName));
-        final String message = bundle.getString("error.empty")
-                .replace("%{field}", title)
-                .replace("%{issue}", issue);
+        final String issue = bundle.getString("issue.empty");
+        final String message = bundle.getString("error.empty").replace("%{field}", title).replace("%{issue}", issue);
         return String.format(message, field, issue);
     }
 
+    /**
+     * iterates over all declared fields for a record performing validation on longs and strings
+     *
+     * @throws ValidationError the invalid field error
+     */
     public void validate() throws ValidationError {
-        for (final Field declaredField : getRequiredFields()) {
+        for (final Field declaredField : getClass().getDeclaredFields()) {
             try {
                 declaredField.setAccessible(true);
                 final Object value = declaredField.get(this);
                 if (value instanceof String) {
                     if (((String) value).length() == 0) {
-                        throw new ValidationError(getErrorMessage(declaredField.getName(), "empty"));
+                        throw new ValidationError(getEmptyErrorMessage(declaredField.getName()));
                     }
                 } else if (value instanceof Long) {
                     if ((Long) value == 0) {
-                        throw new ValidationError(getErrorMessage(declaredField.getName(), "empty"));
+                        throw new ValidationError(getEmptyErrorMessage(declaredField.getName()));
                     }
                 } else if (value instanceof LocalDateTime) {
                 } else {
@@ -67,10 +73,11 @@ public abstract class Record {
         customValidate();
     }
 
+    /**
+     * to be overridden by subclasses that have non-String fields to validate
+     *
+     * @throws ValidationError the invalid field error
+     */
     protected void customValidate() throws ValidationError {
-    }
-
-    protected List<Field> getRequiredFields() {
-        return Arrays.stream(getClass().getDeclaredFields()).collect(Collectors.toList());
     }
 }

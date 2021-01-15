@@ -27,30 +27,6 @@ public final class Customer extends Record implements Model<Customer>, Reportabl
         this.name = name.trim();
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address.trim();
-    }
-
-    public String getPostalCode() {
-        return postalCode;
-    }
-
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode.trim();
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone.trim();
-    }
-
     public long getDivisionId() {
         return divisionId;
     }
@@ -59,21 +35,35 @@ public final class Customer extends Record implements Model<Customer>, Reportabl
         this.divisionId = divisionId;
     }
 
+    /**
+     * @see Model#toValues()
+     */
     @Override
     public List<Object> toValues() {
-        return new ArrayList<Object>(List.of(name, address, postalCode, phone, divisionId));
+        return new ArrayList<>(List.of(name, address, postalCode, phone, divisionId));
     }
 
+    /**
+     * @see Model#copy()
+     */
     @Override
     public Customer copy() {
         return new Customer(id, name, address, postalCode, phone, divisionId);
     }
 
+    /**
+     * overrides built-in toString() for display in a ComboBox
+     *
+     * @return the name of the customer
+     */
     @Override
     public String toString() {
         return name;
     }
 
+    /**
+     * @see Reportable#toReportString()
+     */
     @Override
     public String toReportString() {
         return String.format("\t%d\t%s\n", id, name);

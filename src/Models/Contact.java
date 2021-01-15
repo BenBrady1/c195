@@ -14,15 +14,20 @@ public class Contact extends Record implements Reportable {
         return name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
+    /**
+     * overrides built-in toString() for display in a ComboBox
+     *
+     * @return the name of the contact
+     */
     @Override
     public String toString() {
         return name;
     }
 
+    /**
+     * @see Reportable#toReportString()
+     */
+    @Override
     public String toReportString() {
         return String.format("%d\t%s\t%s\n", id, name, email);
     }

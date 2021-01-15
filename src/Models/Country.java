@@ -12,6 +12,11 @@ public class Country extends Record {
         return country;
     }
 
+    /**
+     * overrides built-in toString() for display in a ComboBox
+     *
+     * @return the name of the country
+     */
     @Override
     public String toString() {
         return country;
