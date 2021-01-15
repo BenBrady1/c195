@@ -21,10 +21,20 @@ public class AppointmentFormFactory extends FormFactory<Appointment, Appointment
         return new AppointmentForm(getTitle(mode), contactMap, customers, mode, record, callback);
     }
 
+    /**
+     * sets the contact map that is passed to every form controller instance. it prevents excessive sql requests
+     *
+     * @param contactMap a map of contactId to contact models
+     */
     public void setContactMap(Map<Long, Contact> contactMap) {
         this.contactMap = contactMap;
     }
 
+    /**
+     * passes a list of all customers to every form controller instance. it prevents excessive sql requests
+     *
+     * @param customers a list of all customers
+     */
     public void setCustomers(List<Customer> customers) {
         this.customers = customers;
     }

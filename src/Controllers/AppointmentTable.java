@@ -3,6 +3,7 @@ package Controllers;
 import Models.Appointment;
 import Models.Contact;
 import Models.Customer;
+import Models.Record;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
@@ -15,11 +16,13 @@ import java.util.*;
 
 public final class AppointmentTable extends Table<Appointment> implements Initializable {
     private Filter filterController = new Filter();
+    private Filter.FilterFields currentFilter = null;
 
     private HashMap<Long, Contact> contactMap = new HashMap<>();
 
     private ObservableList<Customer> customers;
-    private final String selectQuery = "SELECT Appointment_ID, Title, Description, `Location`, `Type`, `Start`, `End`, Customer_ID, User_ID, Contact_ID " +
+    private final String selectQuery = "SELECT Appointment_ID, Title, Description, `Location`, `Type`, `Start`, " +
+            "`End`, Customer_ID, User_ID, Contact_ID " +
             "FROM appointments";
 
     public AppointmentTable(ObservableList<Customer> customers, Main.EventEmitter eventEmitter) {
@@ -37,6 +40,9 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
         filterButton.setVisible(true);
     }
 
+    /**
+     * @see Table#addColumns()
+     */
     @Override
     protected void addColumns() {
         final TableColumn<Appointment, String> contactCol = new TableColumn<>(bundle.getString("appointment.contact"));
@@ -61,16 +67,36 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
                 customerIdCol);
     }
 
+    /**
+     * @see Table#populateData()
+     */
     @Override
     protected final void populateData() {
-        executeQuery(selectQuery, this::parseAppointments);
+        populateTable();
         executeQuery("SELECT * FROM contacts", this::buildContactMap);
     }
 
+    /**
+     * populates the table with all of the appointment information. called by populateData() and the event emitter
+     * listener whenever a customer is deleted. it applies the current filter if it exists
+     */
     private void populateTable() {
-        executeQuery(selectQuery, this::parseAppointments);
+        List<Object> arguments = null;
+        String query = selectQuery;
+        tableView.getItems().clear();
+        if (currentFilter != null) {
+            query += String.format(" WHERE YEAR(`Start`) = ? AND %s(`Start`) = ?", currentFilter.field);
+            arguments = toArray(currentFilter.year, currentFilter.fieldValue);
+        }
+        executeQuery(query, arguments, this::parseAppointments);
     }
 
+    /**
+     * parses the results of an appointment query into instances of the appointment model for display in the table
+     *
+     * @param ex a sql exception from the query
+     * @param rs the result set containing the appointment rows
+     */
     private void parseAppointments(SQLException ex, ResultSet rs) {
         if (ex != null) return;
         final ObservableList<Appointment> appointments = tableView.getItems();
@@ -93,6 +119,13 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
         }
     }
 
+    /**
+     * builds a map of contactId to contact model instances. used to look up the contact name from an appointment record
+     * so the contact name is displayed in the table
+     *
+     * @param ex a sql exception from the query
+     * @param rs the result set containing the contact rows
+     */
     private void buildContactMap(SQLException ex, ResultSet rs) {
         if (ex != null) return;
         try {
@@ -105,17 +138,26 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
         }
     }
 
+    /**
+     * @see Table#getInsertStatement()
+     */
     @Override
     protected String getInsertStatement() {
         return "INSERT INTO appointments (Title, Description, `Location`, `Type`, `Start`, `End`, Customer_ID, User_ID, Contact_ID, Created_By, Last_Updated_By) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
+    /**
+     * @see Table#getNewRecord()
+     */
     @Override
     protected Appointment getNewRecord() {
         return new Appointment(0, null, null, null, null, null, null, 0, 0, 0);
     }
 
+    /**
+     * @see Table#getUpdateStatement()
+     */
     @Override
     protected String getUpdateStatement() {
         return "UPDATE appointments " +
@@ -123,40 +165,56 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
                 "WHERE Appointment_ID = ?";
     }
 
+    /**
+     * @see Table#deleteDependencies(Record)
+     */
     @Override
     protected boolean deleteDependencies(Appointment record) {
         return true;
     }
 
+    /**
+     * @see Table#getDeleteStatement()
+     */
     @Override
     protected String getDeleteStatement() {
         return "DELETE FROM appointments WHERE Appointment_ID = ?";
     }
 
+    /**
+     * @see Table#getDeletedMessage()
+     */
     @Override
     protected String getDeletedMessage() {
         return bundle.getString("record.deleted.message")
                 .replace("%{record}", bundle.getString("appointment.appointment"));
     }
 
+    /**
+     * if the passed in value is 0, it return an empty string for display in the table, otherwise it stringifies the
+     * long
+     *
+     * @param val the long to stringify
+     * @return the string value for the table
+     */
     protected String nonZero(long val) {
         return val == 0 ? "" : Long.toString(val);
     }
 
+    /**
+     * @see Table#addFilter()
+     */
     @Override
     protected void addFilter() {
         filterController.openFilterWindow((fields) -> {
-            List<Object> arguments = null;
-            String query = selectQuery;
-            tableView.getItems().clear();
-            if (fields != null) {
-                query += String.format(" WHERE YEAR(`Start`) = ? AND %s(`Start`) = ?", fields.field);
-                arguments = toArray(fields.year, fields.fieldValue);
-            }
-            executeQuery(query, arguments, this::parseAppointments);
+            currentFilter = fields;
+            populateData();
         });
     }
 
+    /**
+     * @see Table#canUpdate(Record)
+     */
     @Override
     protected boolean canUpdate(Appointment record) {
         String query = "SELECT COUNT(*) FROM appointments " +

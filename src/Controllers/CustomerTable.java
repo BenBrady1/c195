@@ -3,6 +3,7 @@ package Controllers;
 import Models.Country;
 import Models.Customer;
 import Models.Division;
+import Models.Record;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
@@ -22,6 +23,9 @@ public final class CustomerTable extends Table<Customer> {
         ((CustomerFormFactory) formFactory).setCountryMap(Collections.unmodifiableMap(countryMap));
     }
 
+    /**
+     * @see Table#addColumns()
+     */
     @Override
     protected final void addColumns() {
         final TableColumn<Customer, String> nameColumn = getStringColumn(Customer.class, "name");
@@ -41,6 +45,9 @@ public final class CustomerTable extends Table<Customer> {
         tableView.getColumns().addAll(nameColumn, addressColumn, postalCodeColumn, phoneColumn, divisionColumn, countryColumn);
     }
 
+    /**
+     * @see Table#populateData()
+     */
     @Override
     protected final void populateData() {
         executeQuery("SELECT Division_ID, Division, Country_ID FROM first_level_divisions", (ex, rs) -> {
@@ -106,6 +113,9 @@ public final class CustomerTable extends Table<Customer> {
         }
     }
 
+    /**
+     * @see Table#getNewRecord()
+     */
     @Override
     protected Customer getNewRecord() {
         return new Customer(0, "", "", "", "", 0);
@@ -128,6 +138,9 @@ public final class CustomerTable extends Table<Customer> {
         }
     }
 
+    /**
+     * @see Table#getInsertStatement()
+     */
     @Override
     public String getInsertStatement() {
         return "INSERT INTO customers " +
@@ -135,6 +148,9 @@ public final class CustomerTable extends Table<Customer> {
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
     }
 
+    /**
+     * @see Table#getUpdateStatement()
+     */
     @Override
     public String getUpdateStatement() {
         return "UPDATE customers " +
@@ -142,27 +158,42 @@ public final class CustomerTable extends Table<Customer> {
                 "WHERE Customer_ID = ?";
     }
 
+    /**
+     * @see Table#getDeleteStatement()
+     */
     @Override
     public String getDeleteStatement() {
         return "DELETE FROM customers WHERE Customer_ID = ?";
     }
 
+    /**
+     * @see Table#deleteDependencies(Record)
+     */
     @Override
     protected boolean deleteDependencies(Customer record) {
         return executeUpdate("DELETE FROM appointments WHERE Customer_ID = ?", toArray(record.getId()), (ex, updates) -> ex == null);
     }
 
+    /**
+     * @see Table#getDeletedMessage()
+     */
     @Override
     protected String getDeletedMessage() {
         return bundle.getString("record.deleted.message")
                 .replace("%{record}", bundle.getString("customer.customer"));
     }
 
+    /**
+     * @see Table#canUpdate(Record)
+     */
     @Override
     protected boolean canUpdate(Customer record) {
         return true;
     }
 
+    /**
+     * @see Table#emitEvent()
+     */
     @Override
     protected void emitEvent() {
         eventEmitter.emit(Main.Event.CustomerDeleted);
