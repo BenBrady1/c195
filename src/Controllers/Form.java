@@ -174,6 +174,7 @@ public abstract class Form<T extends Record> extends Base implements Initializab
             loader.setController(this);
             Scene scene = new Scene(loader.load(), getWidth(), getHeight());
             stage = new Stage();
+            // ensures the callback is always called
             stage.setOnHidden(ev -> handleClose(null));
             stage.setScene(scene);
             stage.setTitle(getWindowTitle());
@@ -192,6 +193,7 @@ public abstract class Form<T extends Record> extends Base implements Initializab
      * @see Form#iterateStringFields(BiConsumer)
      */
     private void setTextFields() {
+        // lambda to iterate over all the fields. cleaner and more readable than an anonymous class
         iterateStringFields((textField, recordField) -> {
             try {
                 final String data = (String) recordField.get(record);
@@ -209,6 +211,7 @@ public abstract class Form<T extends Record> extends Base implements Initializab
      * @see Form#iterateStringFields(BiConsumer)
      */
     private void applyStringFormFieldsToRecord() {
+        // lambda to iterate over all the fields. cleaner and more readable than an anonymous class
         iterateStringFields((textField, recordField) -> {
             try {
                 recordField.set(record, textField.getText().trim());

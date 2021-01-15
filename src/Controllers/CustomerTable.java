@@ -33,11 +33,13 @@ public final class CustomerTable extends Table<Customer> {
         final TableColumn<Customer, String> postalCodeColumn = getStringColumn(Customer.class, "postalCode");
         final TableColumn<Customer, String> phoneColumn = getStringColumn(Customer.class, "phone");
         final TableColumn<Customer, String> divisionColumn = new TableColumn<>(bundle.getString("customer.division"));
+        // lambda to properly convert a division id into a displayable division name
         divisionColumn.setCellValueFactory(param -> {
             final Division division = divisionMap.get(param.getValue().getDivisionId());
             return new SimpleStringProperty(division.getDivision());
         });
         final TableColumn<Customer, String> countryColumn = new TableColumn<>(bundle.getString("customer.country"));
+        // lambda to properly convert a country id into a displayable country name
         countryColumn.setCellValueFactory(param -> {
             final Division division = divisionMap.get(param.getValue().getDivisionId());
             return new SimpleStringProperty(countryMap.get(division.getCountryId()).getCountry());
@@ -50,29 +52,21 @@ public final class CustomerTable extends Table<Customer> {
      */
     @Override
     protected final void populateData() {
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery("SELECT Division_ID, Division, Country_ID FROM first_level_divisions", (ex, rs) -> {
-            if (ex == null) {
-                buildDivisionMap(rs);
-            } else {
-                printSQLException(ex);
-            }
+            if (ex == null) buildDivisionMap(rs);
         });
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery("SELECT Country_ID, Country FROM countries", (ex, rs) -> {
-            if (ex == null) {
-                addCountries(rs);
-            } else {
-                printSQLException(ex);
-            }
+            if (ex == null) addCountries(rs);
         });
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery("SELECT Customer_ID, Customer_Name, Address, Postal_Code, Phone, d.Division_ID, d.Country_ID " +
                 "FROM customers c " +
                 "JOIN first_level_divisions d ON d.Division_ID = c.Division_ID;", (ex, rs) -> {
-            if (ex == null) {
-                consumeResultSet(rs);
-            } else {
-                printSQLException(ex);
-            }
+            if (ex == null) consumeResultSet(rs);
         });
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery("SELECT COUNT(*) FROM appointments " +
                 "WHERE `Start` BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)", (ex, rs) -> {
             if (ex != null) return;
@@ -171,6 +165,7 @@ public final class CustomerTable extends Table<Customer> {
      */
     @Override
     protected boolean deleteDependencies(Customer record) {
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         return executeUpdate("DELETE FROM appointments WHERE Customer_ID = ?", toArray(record.getId()), (ex, updates) -> ex == null);
     }
 

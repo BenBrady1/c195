@@ -213,6 +213,7 @@ public class AppointmentForm extends Form<Appointment> {
      * creates a map of User Id => User object for easy lookup
      */
     private void buildUserMap() {
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery("SELECT User_ID, User_Name FROM users", (ex, rs) -> {
             if (ex != null) return;
             try {

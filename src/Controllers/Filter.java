@@ -1,5 +1,7 @@
 package Controllers;
 
+import javafx.beans.Observable;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -74,12 +76,14 @@ public class Filter extends Base implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setYears();
-        toggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> updateItems(newValue));
-        yearComboBox.getSelectionModel()
-                .selectedItemProperty()
-                .addListener(((observable, oldValue, newValue) -> updateItems(toggleGroup.getSelectedToggle())));
+        toggleGroup.selectedToggleProperty().addListener(this::updateItems);
+        yearComboBox.getSelectionModel().selectedItemProperty().addListener(this::handleYearChange);
         toggleGroup.getToggles().addAll(monthButton, weekButton);
         toggleGroup.selectToggle(monthButton);
+    }
+
+    private void handleYearChange(Observable observable) {
+        updateItems(null, null, toggleGroup.getSelectedToggle());
     }
 
     /**
@@ -87,7 +91,7 @@ public class Filter extends Base implements Initializable {
      *
      * @param newValue the radio button that has been selected
      */
-    private void updateItems(Toggle newValue) {
+    private void updateItems(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
         String bundleProp;
         if (newValue == monthButton) {
             bundleProp = "month";
@@ -106,6 +110,7 @@ public class Filter extends Base implements Initializable {
      * have and set them in the year ComboBox
      */
     private void setYears() {
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery("SElECT DISTINCT YEAR(`Start`) FROM appointments ORDER BY YEAR(`Start`)", (ex, rs) -> {
             if (ex != null) return;
             final ObservableList<Integer> years = yearComboBox.getItems();
@@ -128,6 +133,7 @@ public class Filter extends Base implements Initializable {
         final ObservableList<ComboBoxValue> items = comboBox.getItems();
         items.clear();
         final List<Object> arguments = List.of(yearComboBox.getValue());
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery("SELECT DISTINCT WEEK(`Start`) " +
                 "FROM appointments " +
                 "WHERE YEAR(`Start`) = ? " +
@@ -152,6 +158,7 @@ public class Filter extends Base implements Initializable {
         final ObservableList<ComboBoxValue> items = comboBox.getItems();
         items.clear();
         final List<Object> arguments = List.of(yearComboBox.getValue());
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery("SELECT DISTINCT MONTH(`Start`) " +
                 "FROM appointments " +
                 "WHERE YEAR(`Start`) = ? " +
@@ -230,6 +237,7 @@ public class Filter extends Base implements Initializable {
             loader.setController(this);
             Scene scene = new Scene(loader.load(), 400, 400);
             stage = new Stage();
+            // ensures the callback is always called
             stage.setOnHidden(ev -> handleClose(null));
             stage.setScene(scene);
             stage.setTitle(bundle.getString("filter.windowTitle"));

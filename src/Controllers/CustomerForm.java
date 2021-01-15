@@ -14,6 +14,7 @@ import java.net.URL;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public final class CustomerForm extends Form<Customer> implements Initializable {
@@ -47,6 +48,7 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         ObservableList<Country> countries = countryComboBox.getItems();
+        // lambda to iterate over all the key value pairs. cleaner and more readable than an anonymous class
         divisionMap.forEach((id, division) -> {
             Country country = countryMap.get(division.getCountryId());
             if (!countries.contains(country)) {
@@ -83,6 +85,7 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
         final Country country = countryComboBox.getValue();
         final ObservableList<Division> divisions = divisionComboBox.getItems();
         divisions.clear();
+        // lambda to iterate over all the key value pairs. cleaner and more readable than an anonymous class
         divisionMap.forEach((key, division) -> {
             if (division.getCountryId() == country.getId()) divisions.add(division);
         });

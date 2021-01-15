@@ -60,6 +60,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
             field.setAccessible(true);
             final String key = String.format("%s.%s", tClass.getSimpleName().toLowerCase(), field.getName());
             final TableColumn<T, String> column = new TableColumn<>(bundle.getString(key));
+            // lambda to properly set the string value in the table
             column.setCellValueFactory(param -> {
                 try {
                     return new SimpleStringProperty((String) field.get(param.getValue()));
@@ -87,6 +88,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         filterButton.setDisable(true);
         filterButton.setVisible(false);
         final TableColumn<T, Long> idColumn = new TableColumn<>("ID");
+        // lambda ensures the long values are properly displayed
         idColumn.setCellValueFactory(param -> new SimpleLongProperty(param.getValue().getId()).asObject());
         tableView.getColumns().add(idColumn);
         addColumns();
@@ -125,6 +127,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
             final List<Object> arguments = record.toValues();
             arguments.add(userId);
             arguments.add(userId);
+            // lambda to consume an exception and result set and allow for DRY resource cleanup
             executeInsert(getInsertStatement(), arguments, (ex, newId) -> {
                 if (ex != null) printSQLException(ex);
                 if (newId != null) record.setId(newId);
@@ -148,6 +151,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     @FXML
     private void addRecord() {
         if (formController == null) {
+            // opens the form and registers a callback to be called with the completed record
             openForm(FormFactory.Mode.Create, getNewRecord(), (newRecord) -> {
                 if (newRecord != null) {
                     addToDatabase(newRecord);
@@ -171,6 +175,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     private void viewRecord() {
         final T selected = getSelectedRecord();
         if (selected != null && formController == null) {
+            // opens the form and registers a callback to be called with the completed record
             openForm(FormFactory.Mode.Read, selected, (record) -> finalizeAction());
         }
     }
@@ -185,6 +190,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
             final List<Object> arguments = record.toValues();
             arguments.add(userId);
             arguments.add(record.getId());
+            // lambda to consume an exception and result set and allow for DRY resource cleanup
             executeUpdate(getUpdateStatement(), arguments, (ex, updateCount) -> {
                 if (ex != null) printSQLException(ex);
                 if (updateCount == 1) getSelectedRecord().applyChanges(record);
@@ -212,6 +218,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     private void editRecord() {
         final T selected = getSelectedRecord();
         if (selected != null && formController == null) {
+            // opens the form and registers a callback to be called with the completed record
             openForm(FormFactory.Mode.Update, selected.copy(), (updatedRecord) -> {
                 if (updatedRecord != null) updateInDatabase(updatedRecord);
                 finalizeAction();
@@ -243,6 +250,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
      */
     protected void deleteFromDatabase(T record) {
         if (deleteDependencies(record)) {
+            // lambda to consume an exception and result set and allow for DRY resource cleanup
             executeUpdate(getDeleteStatement(), toArray(record.getId()), (ex, updates) -> {
                 if (ex != null) printSQLException(ex);
                 if (updates == 1) record.setId(0);

@@ -47,15 +47,19 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
     protected void addColumns() {
         final TableColumn<Appointment, String> contactCol = new TableColumn<>(bundle.getString("appointment.contact"));
         contactCol
+                // lambda to correctly translate a contact id into a contact name
                 .setCellValueFactory(param -> {
                     final Optional<Contact> contact = Optional.ofNullable(contactMap.get(param.getValue().getContactId()));
                     return new SimpleStringProperty(contact.map(Contact::getName).orElse(""));
                 });
         final TableColumn<Appointment, String> startCol = new TableColumn<>(bundle.getString("appointment.start"));
+        // lambda to correctly translate a start time into the local time zone
         startCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getFormattedStart()));
         final TableColumn<Appointment, String> endCol = new TableColumn<>(bundle.getString("appointment.end"));
+        // lambda to correctly translate an end time into the local time zone
         endCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getFormattedEnd()));
         final TableColumn<Appointment, String> customerIdCol = new TableColumn<>(bundle.getString("appointment.customerId"));
+        // lambda to correctly display a customer id, if valid
         customerIdCol.setCellValueFactory(param -> new SimpleStringProperty(nonZero(param.getValue().getCustomerId())));
         tableView.getColumns().addAll(getStringColumn(Appointment.class, "title"),
                 getStringColumn(Appointment.class, "description"),
@@ -206,6 +210,7 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
      */
     @Override
     protected void addFilter() {
+        // lambda registers a callback with the filter controller so we know when the filter can be applied
         filterController.openFilterWindow((fields) -> {
             currentFilter = fields;
             populateData();
@@ -225,6 +230,7 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
             query += " AND Appointment_Id != ?";
             arguments.add(record.getId());
         }
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         return executeQuery(query, arguments, (ex, rs) -> {
             if (ex != null) return false;
             try {

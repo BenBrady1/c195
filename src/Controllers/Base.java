@@ -127,6 +127,7 @@ abstract public class Base {
      * @see Base#executeQuery(String, List, BiFunction)
      */
     protected <T> T executeQuery(String query, BiFunction<SQLException, ResultSet, T> handler) {
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         return executeQuery(query, null, (ex, rs) -> (T) handler.apply(ex, rs));
     }
 
@@ -139,6 +140,7 @@ abstract public class Base {
      * @see Base#executeQuery(String, List, BiFunction)
      */
     protected void executeQuery(String query, BiConsumer<SQLException, ResultSet> handler) {
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery(query, null, (ex, rs) -> {
             handler.accept(ex, rs);
             return null;
@@ -155,6 +157,7 @@ abstract public class Base {
      * @see Base#executeQuery(String, List, BiFunction)
      */
     protected void executeQuery(String query, List<Object> arguments, BiConsumer<SQLException, ResultSet> handler) {
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeQuery(query, arguments, (ex, rs) -> {
             handler.accept(ex, rs);
             return null;
@@ -223,6 +226,7 @@ abstract public class Base {
      * @see Base#executeUpdate(String, List, BiFunction)
      */
     protected void executeUpdate(String query, List<Object> arguments, BiConsumer<SQLException, Integer> handler) {
+        // lambda to consume an exception and result set and allow for DRY resource cleanup
         executeUpdate(query, arguments, ((BiFunction<SQLException, Integer, Void>) (ex, updates) -> {
             handler.accept(ex, updates);
             return null;
