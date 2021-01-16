@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class AppointmentForm extends Form<Appointment> {
     @FXML
@@ -63,7 +64,7 @@ public class AppointmentForm extends Form<Appointment> {
                            List<Customer> customers,
                            FormFactory.Mode mode,
                            Appointment record,
-                           Consumer<Appointment> callback) {
+                           Function<Appointment, Boolean> callback) {
         super(windowTitle, mode, record, callback);
         this.contactMap = contactMap;
         for (Customer customer : customers) {

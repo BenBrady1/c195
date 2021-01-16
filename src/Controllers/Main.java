@@ -8,7 +8,10 @@ import javafx.scene.control.TabPane;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class Main extends Base implements Initializable {
     public enum Event {
@@ -24,6 +27,7 @@ public class Main extends Base implements Initializable {
 
         /**
          * registers an event listener
+         *
          * @param e the event to listen to
          * @param r a callback for when the event happens
          */
@@ -38,11 +42,15 @@ public class Main extends Base implements Initializable {
 
         /**
          * calls all registered event listeners for the emitted event
+         *
          * @param e the event that happened
          */
         public void emit(Event e) {
-            for (Runnable runnable : eventMap.get(e)) {
-                runnable.run();
+            final List<Runnable> listeners = eventMap.get(e);
+            if (listeners != null) {
+                for (Runnable runnable : listeners) {
+                    runnable.run();
+                }
             }
         }
     }

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * an abstract class to hold records from the database of the given Record subclass
@@ -103,7 +103,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
      * @param record   the record to display in the form
      * @param callback the callback to consume the record after editing has finished
      */
-    private void openForm(FormFactory.Mode mode, T record, Consumer<T> callback) {
+    private void openForm(FormFactory.Mode mode, T record, Function<T, Boolean> callback) {
         formController = formFactory.getInstance(mode, record, callback);
         formController.open();
     }
@@ -122,8 +122,9 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
      *
      * @param record the record to insert
      */
-    private void addToDatabase(T record) {
-        if (canUpdate(record)) {
+    private boolean addToDatabase(T record) {
+        final boolean updatable = canUpdate(record);
+        if (updatable) {
             final List<Object> arguments = record.toValues();
             arguments.add(userId);
             arguments.add(userId);
@@ -133,6 +134,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
                 if (newId != null) record.setId(newId);
             });
         }
+
+        return updatable;
     }
 
     /**
@@ -153,13 +156,15 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         if (formController == null) {
             // opens the form and registers a callback to be called with the completed record
             openForm(FormFactory.Mode.Create, getNewRecord(), (newRecord) -> {
-                if (newRecord != null) {
-                    addToDatabase(newRecord);
-                    if (newRecord.getId() != 0) {
+                final boolean recordHandledCorrectly = newRecord == null || addToDatabase(newRecord);
+                if (recordHandledCorrectly) {
+                    if (newRecord != null && newRecord.getId() != 0) {
                         tableView.getItems().add(newRecord);
                     }
+
+                    finalizeAction();
                 }
-                finalizeAction();
+                return recordHandledCorrectly;
             });
         }
     }
@@ -176,7 +181,10 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         final T selected = getSelectedRecord();
         if (selected != null && formController == null) {
             // opens the form and registers a callback to be called with the completed record
-            openForm(FormFactory.Mode.Read, selected, (record) -> finalizeAction());
+            openForm(FormFactory.Mode.Read, selected, (record) -> {
+                finalizeAction();
+                return true;
+            });
         }
     }
 
@@ -185,8 +193,9 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
      *
      * @param record the record to update
      */
-    protected void updateInDatabase(T record) {
-        if (canUpdate(record)) {
+    protected boolean updateInDatabase(T record) {
+        final boolean updatable = canUpdate(record);
+        if (updatable) {
             final List<Object> arguments = record.toValues();
             arguments.add(userId);
             arguments.add(record.getId());
@@ -196,6 +205,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
                 if (updateCount == 1) getSelectedRecord().applyChanges(record);
             });
         }
+        return updatable;
     }
 
     /**
@@ -220,8 +230,9 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         if (selected != null && formController == null) {
             // opens the form and registers a callback to be called with the completed record
             openForm(FormFactory.Mode.Update, selected.copy(), (updatedRecord) -> {
-                if (updatedRecord != null) updateInDatabase(updatedRecord);
-                finalizeAction();
+                final boolean recordHandledCorrectly = updatedRecord == null || updateInDatabase(updatedRecord);
+                if (recordHandledCorrectly) finalizeAction();
+                return recordHandledCorrectly;
             });
         }
     }
@@ -276,11 +287,12 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
         final T recordToDelete = getSelectedRecord();
         if (recordToDelete != null) {
             deleteButton.setDisable(true);
+            final String message = getDeletedMessage(recordToDelete);
             deleteFromDatabase(recordToDelete);
             if (recordToDelete.getId() == 0) {
                 tableView.getItems().remove(recordToDelete);
                 tableView.refresh();
-                displayAlert(bundle.getString("record.deleted.title"), getDeletedMessage(), Alert.AlertType.INFORMATION);
+                displayAlert(bundle.getString("record.deleted.title"), message, Alert.AlertType.INFORMATION);
                 emitEvent();
             }
             deleteButton.setDisable(false);
@@ -290,7 +302,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     protected void emitEvent() {
     }
 
-    protected abstract String getDeletedMessage();
+    protected abstract String getDeletedMessage(T record);
 
 
     public ObservableList<T> getData() {

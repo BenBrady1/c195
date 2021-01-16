@@ -3,6 +3,7 @@ package Controllers;
 import Models.Record;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Instantiates a form controller of type T for model R
@@ -41,5 +42,5 @@ public abstract class FormFactory<R extends Record, T extends Form<R>> extends B
      * @param callback the callback that will act on the record after editing has finished
      * @return the form controller instance
      */
-    abstract public T getInstance(Mode mode, R record, Consumer<R> callback);
+    abstract public T getInstance(Mode mode, R record, Function<R, Boolean> callback);
 }

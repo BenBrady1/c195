@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Abstract generic class that creates base functionality common to all the forms. It defines abstract methods that must
@@ -36,11 +36,11 @@ public abstract class Form<T extends Record> extends Base implements Initializab
     private FormFactory.Mode mode;
     protected T record;
     protected boolean readOnly = true;
-    protected Consumer<T> callback;
+    protected Function<T, Boolean> callback;
     private Stage stage;
     private final String windowTitle;
 
-    public Form(String windowTitle, FormFactory.Mode mode, T record, Consumer<T> callback) {
+    public Form(String windowTitle, FormFactory.Mode mode, T record, Function<T, Boolean> callback) {
         this.windowTitle = windowTitle;
         readOnly = mode == FormFactory.Mode.Read;
         this.mode = mode;
@@ -63,6 +63,7 @@ public abstract class Form<T extends Record> extends Base implements Initializab
 
     /**
      * Opens a form to create/view/update a record
+     *
      * @return this
      */
     public Form<T> open() {
@@ -75,12 +76,19 @@ public abstract class Form<T extends Record> extends Base implements Initializab
      * called for the first time
      *
      * @param record the record that is to be saved/updated
+     * @return whether the window can close
      */
-    private void callCallback(T record) {
+    private boolean callCallback(T record) {
         if (callback != null) {
-            callback.accept(record);
-            callback = null;
+            if (callback.apply(record)) {
+                callback = null;
+                return true;
+            } else {
+                return false;
+            }
         }
+
+        return true;
     }
 
     /**
@@ -99,13 +107,12 @@ public abstract class Form<T extends Record> extends Base implements Initializab
             applyStringFormFieldsToRecord();
             applyOtherFieldsToRecord();
             record.validate();
-            callCallback(record);
-            handleClose();
+            if (callCallback(record)) handleClose();
         } catch (ValidationError err) {
             displayError(err);
-            for (Node button : buttonBar.getButtons()) {
-                button.setDisable(false);
-            }
+        }
+        for (Node button : buttonBar.getButtons()) {
+            button.setDisable(false);
         }
     }
 

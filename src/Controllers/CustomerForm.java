@@ -14,8 +14,7 @@ import java.net.URL;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public final class CustomerForm extends Form<Customer> implements Initializable {
     @FXML
@@ -39,7 +38,7 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
                         Map<Long, Country> countryMap,
                         FormFactory.Mode mode,
                         Customer record,
-                        Consumer<Customer> callback) {
+                        Function<Customer, Boolean> callback) {
         super(windowTitle, mode, record, callback);
         this.divisionMap = divisionMap;
         this.countryMap = countryMap;

@@ -115,6 +115,11 @@ public final class CustomerTable extends Table<Customer> {
         return new Customer(0, "", "", "", "", 0);
     }
 
+    @Override
+    protected boolean canUpdate(Customer record) {
+        return true;
+    }
+
     private void consumeResultSet(ResultSet rs) {
         try {
             while (rs.next()) {
@@ -170,20 +175,36 @@ public final class CustomerTable extends Table<Customer> {
     }
 
     /**
-     * @see Table#getDeletedMessage()
+     * @see Table#getDeletedMessage(Record)
      */
     @Override
-    protected String getDeletedMessage() {
-        return bundle.getString("record.deleted.message")
-                .replace("%{record}", bundle.getString("customer.customer"));
-    }
+    protected String getDeletedMessage(Customer customer) {
+        final String appointments = executeQuery("SELECT Appointment_ID, Type FROM appointments WHERE Customer_ID = ?",
+                toArray(customer.getId()),
+                (ex, rs) -> {
+                    String output = "";
+                    try {
+                        while (rs.next()) {
+                            output += String.format("%s: %d, %s: %s\n",
+                                    bundle.getString("record.deleted.id"),
+                                    rs.getInt(1),
+                                    bundle.getString("appointment.type"),
+                                    rs.getString(2));
+                        }
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
+                    }
+                    return output;
+                });
 
-    /**
-     * @see Table#canUpdate(Record)
-     */
-    @Override
-    protected boolean canUpdate(Customer record) {
-        return true;
+        String message = bundle.getString("record.deleted.message")
+                .replace("%{record}", bundle.getString("customer.customer"));
+
+        if (appointments.length() != 0) {
+            message += "\n\n" + bundle.getString("appointment.deleted") + "\n" + appointments;
+        }
+
+        return message;
     }
 
     /**

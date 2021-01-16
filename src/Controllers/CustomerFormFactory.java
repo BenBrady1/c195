@@ -6,7 +6,7 @@ import Models.Division;
 import Models.Record;
 
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public final class CustomerFormFactory extends FormFactory<Customer, CustomerForm> {
     private Map<Long, Division> divisionMap;
@@ -17,10 +17,10 @@ public final class CustomerFormFactory extends FormFactory<Customer, CustomerFor
     }
 
     /**
-     * @see FormFactory#getInstance(Mode, Record, Consumer)
+     * @see FormFactory#getInstance(Mode, Record, Function)
      */
     @Override
-    public CustomerForm getInstance(Mode mode, Customer record, Consumer<Customer> callback) {
+    public CustomerForm getInstance(Mode mode, Customer record, Function<Customer, Boolean> callback) {
         return new CustomerForm(getTitle(mode), divisionMap, countryMap, mode, record, callback);
     }
 

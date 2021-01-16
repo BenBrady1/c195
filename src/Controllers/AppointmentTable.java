@@ -186,12 +186,18 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
     }
 
     /**
-     * @see Table#getDeletedMessage()
+     * @see Table#getDeletedMessage(Record)
      */
     @Override
-    protected String getDeletedMessage() {
-        return bundle.getString("record.deleted.message")
-                .replace("%{record}", bundle.getString("appointment.appointment"));
+    protected String getDeletedMessage(Appointment appointment) {
+        final String replacement = String.format("%s (%s: %d, %s: %s)",
+                bundle.getString("appointment.appointment"),
+                bundle.getString("record.deleted.id"),
+                appointment.getId(),
+                bundle.getString("appointment.type"),
+                appointment.getType());
+        return bundle.getString("record.deleted.message").replace("%{record}", replacement);
+
     }
 
     /**

@@ -8,6 +8,7 @@ import Models.Record;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class AppointmentFormFactory extends FormFactory<Appointment, AppointmentForm> {
     private Map<Long, Contact> contactMap;
@@ -18,10 +19,10 @@ public class AppointmentFormFactory extends FormFactory<Appointment, Appointment
     }
 
     /**
-     * @see FormFactory#getInstance(Mode, Record, Consumer) 
+     * @see FormFactory#getInstance(Mode, Record, Consumer)
      */
     @Override
-    public AppointmentForm getInstance(Mode mode, Appointment record, Consumer<Appointment> callback) {
+    public AppointmentForm getInstance(Mode mode, Appointment record, Function<Appointment, Boolean> callback) {
         return new AppointmentForm(getTitle(mode), contactMap, customers, mode, record, callback);
     }
 
