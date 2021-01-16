@@ -14,60 +14,22 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class Main extends Base implements Initializable {
-    public enum Event {
-        CustomerDeleted
-    }
-
-    /**
-     * event emitter class. used by customer table to alert the appointment table of a customer deletion so the
-     * deleted appointments can be removed from the table
-     */
-    final public class EventEmitter implements java.util.EventListener {
-        final private HashMap<Event, List<Runnable>> eventMap = new HashMap<>();
-
-        /**
-         * registers an event listener
-         *
-         * @param e the event to listen to
-         * @param r a callback for when the event happens
-         */
-        public void addListener(Event e, Runnable r) {
-            List<Runnable> listeners = eventMap.get(e);
-            if (listeners == null) {
-                listeners = new ArrayList<>();
-                eventMap.put(e, listeners);
-            }
-            listeners.add(r);
-        }
-
-        /**
-         * calls all registered event listeners for the emitted event
-         *
-         * @param e the event that happened
-         */
-        public void emit(Event e) {
-            final List<Runnable> listeners = eventMap.get(e);
-            if (listeners != null) {
-                for (Runnable runnable : listeners) {
-                    runnable.run();
-                }
-            }
-        }
-    }
-
+    private final EventEmitter eventEmitter = new EventEmitter();
     @FXML
     private TabPane tabPane;
     @FXML
     private Tab customerTab;
     @FXML
     private Tab appointmentTab;
-
     private boolean customerTabInitialized = false;
     private boolean appointmentTabInitialized = false;
-
-    private EventEmitter eventEmitter = new EventEmitter();
     private CustomerTable customerTableController;
 
+    /**
+     * lambda1: determine which tab has been selected and display the correct data
+     *
+     * @see Initializable#initialize(URL, ResourceBundle)
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // lambda to easily determine which tab has been selected and display the correct data
@@ -119,6 +81,47 @@ public class Main extends Base implements Initializable {
         } catch (IOException ex) {
             System.out.println(ex);
             ex.printStackTrace();
+        }
+    }
+
+    public enum Event {
+        CustomerDeleted
+    }
+
+    /**
+     * event emitter class. used by customer table to alert the appointment table of a customer deletion so the
+     * deleted appointments can be removed from the table
+     */
+    final public class EventEmitter implements java.util.EventListener {
+        final private HashMap<Event, List<Runnable>> eventMap = new HashMap<>();
+
+        /**
+         * registers an event listener
+         *
+         * @param e the event to listen to
+         * @param r a callback for when the event happens
+         */
+        public void addListener(Event e, Runnable r) {
+            List<Runnable> listeners = eventMap.get(e);
+            if (listeners == null) {
+                listeners = new ArrayList<>();
+                eventMap.put(e, listeners);
+            }
+            listeners.add(r);
+        }
+
+        /**
+         * calls all registered event listeners for the emitted event
+         *
+         * @param e the event that happened
+         */
+        public void emit(Event e) {
+            final List<Runnable> listeners = eventMap.get(e);
+            if (listeners != null) {
+                for (Runnable runnable : listeners) {
+                    runnable.run();
+                }
+            }
         }
     }
 }

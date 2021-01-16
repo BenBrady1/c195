@@ -26,16 +26,15 @@ import java.util.function.Function;
  * @param <T> a subclass of the Record model that implements the Model interface
  */
 public abstract class Table<T extends Record & Model<T>> extends Base implements Initializable {
+    final protected FormFactory formFactory;
+    final protected Main.EventEmitter eventEmitter;
     @FXML
     protected TableView<T> tableView;
     @FXML
-    private Button deleteButton;
-    @FXML
     protected Button filterButton;
-
     protected Form<T> formController;
-    final protected FormFactory formFactory;
-    final protected Main.EventEmitter eventEmitter;
+    @FXML
+    private Button deleteButton;
 
     public Table(FormFactory formFactory, Main.EventEmitter eventEmitter) {
         this.formFactory = formFactory;
@@ -48,6 +47,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     protected abstract void addColumns();
 
     /**
+     * lambda1: properly set the string value in the table
+     * <p>
      * uses introspection to get all the string fields for the given generic mode T
      *
      * @param tClass    the class for T
@@ -83,6 +84,11 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
      */
     protected abstract void populateData();
 
+    /**
+     * lambda1: ensures the long values are properly displayed
+     *
+     * @see Initializable#initialize(URL, ResourceBundle)
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         filterButton.setDisable(true);
@@ -118,6 +124,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * executes a SQL insert statement for the given record
      *
      * @param record the record to insert
@@ -149,6 +157,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     protected abstract T getNewRecord();
 
     /**
+     * lambda1: opens the form and registers a callback to be called with the completed record
+     * <p>
      * opens the form with a blank record and saves it into the database
      */
     @FXML
@@ -174,6 +184,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     /**
+     * lambda1: opens the form and registers a callback to be called with the completed record
+     * <p>
      * opens the selected record in view mode
      */
     @FXML
@@ -189,6 +201,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * opens the edit form and saves the changes to the database
      *
      * @param record the record to update
@@ -222,6 +236,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     protected abstract String getUpdateStatement();
 
     /**
+     * lambda1: opens the form and registers a callback to be called with the completed record
+     * <p>
      * opens the form with the given record and executes a SQL statement to update a record in the database
      */
     @FXML
@@ -255,6 +271,8 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * executes a SQL statement to delete a record from the database
      *
      * @param record the record delete

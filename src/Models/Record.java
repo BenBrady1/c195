@@ -8,13 +8,6 @@ import java.util.ResourceBundle;
 public abstract class Record {
     public static ResourceBundle bundle;
     public static Locale locale;
-
-    public class ValidationError extends Exception {
-        public ValidationError(String message) {
-            super(message);
-        }
-    }
-
     protected long id;
 
     public Record(long id) {
@@ -79,5 +72,11 @@ public abstract class Record {
      * @throws ValidationError the invalid field error
      */
     protected void customValidate() throws ValidationError {
+    }
+
+    public class ValidationError extends Exception {
+        public ValidationError(String message) {
+            super(message);
+        }
     }
 }

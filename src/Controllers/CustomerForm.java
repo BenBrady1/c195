@@ -17,6 +17,8 @@ import java.util.ResourceBundle;
 import java.util.function.Function;
 
 public final class CustomerForm extends Form<Customer> implements Initializable {
+    private final Map<Long, Country> countryMap;
+    private final Map<Long, Division> divisionMap;
     @FXML
     private TextField nameField;
     @FXML
@@ -30,9 +32,6 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
     @FXML
     private ComboBox<Country> countryComboBox;
 
-    private final Map<Long, Country> countryMap;
-    private final Map<Long, Division> divisionMap;
-
     public CustomerForm(String windowTitle,
                         Map<Long, Division> divisionMap,
                         Map<Long, Country> countryMap,
@@ -44,6 +43,11 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
         this.countryMap = countryMap;
     }
 
+    /**
+     * lambda1: iterate over all the key value pairs. cleaner and more readable than an anonymous class
+     *
+     * @see Initializable#initialize(URL, ResourceBundle)
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         ObservableList<Country> countries = countryComboBox.getItems();
@@ -79,6 +83,13 @@ public final class CustomerForm extends Form<Customer> implements Initializable 
         return "/Views/CustomerForm.fxml";
     }
 
+    /**
+     * lambda1: iterate over all the key value pairs. cleaner and more readable than an anonymous class
+     * <p>
+     * sets the division ComboBox with all the divisions for the selected country
+     *
+     * @param event JavaFX action event
+     */
     @FXML
     private void populateDivisions(ActionEvent event) {
         final Country country = countryComboBox.getValue();

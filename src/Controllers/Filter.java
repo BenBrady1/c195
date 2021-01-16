@@ -21,54 +21,18 @@ import java.util.function.Consumer;
  * controller to filter the appointment table by month or week and year
  */
 public class Filter extends Base implements Initializable {
-    /**
-     * the object that is returned after the filter is applied. it contains the values to be used an arguments for the
-     * query
-     */
-    public static class FilterFields {
-        final public int year;
-        final public String field;
-        final public int fieldValue;
-
-        public FilterFields(int year, String field, int fieldValue) {
-            this.year = year;
-            this.field = field;
-            this.fieldValue = fieldValue;
-        }
-    }
-
-    /**
-     * an object to hold ComboBox values. there is an internal value for use in querying and a display value for the
-     * user to interact with
-     */
-    private static class ComboBoxValue {
-        final private String display;
-        final public int value;
-
-        public ComboBoxValue(String display, int value) {
-            this.display = display;
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return display;
-        }
-    }
-
+    @FXML
+    private final ToggleGroup toggleGroup = new ToggleGroup();
     @FXML
     private ComboBox<Integer> yearComboBox;
     @FXML
     private ComboBox<ComboBoxValue> comboBox;
-    @FXML
-    private ToggleGroup toggleGroup = new ToggleGroup();
     @FXML
     private RadioButton monthButton;
     @FXML
     private RadioButton weekButton;
     @FXML
     private Label comboBoxLabel;
-
     private Stage stage;
     private Consumer<FilterFields> callback;
     private String fieldName;
@@ -88,9 +52,10 @@ public class Filter extends Base implements Initializable {
 
     /**
      * used to populate the month/week ComboBox with the appropriate values for the selected year
+     *
      * @param observable not used
-     * @param oldValue not used
-     * @param newValue the radio button that has been selected
+     * @param oldValue   not used
+     * @param newValue   the radio button that has been selected
      */
     private void updateItems(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
         String bundleProp;
@@ -107,6 +72,8 @@ public class Filter extends Base implements Initializable {
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * when the filter window is opened, we query for the distinct list of years that the appointments in the database
      * have and set them in the year ComboBox
      */
@@ -127,6 +94,8 @@ public class Filter extends Base implements Initializable {
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * called when a year is selected in the ComboBox. we get a list of all weeks of that year that have an appointment.
      * these weeks are then set in the ComboBox
      */
@@ -152,6 +121,8 @@ public class Filter extends Base implements Initializable {
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * called when a year is selected in the ComboBox. we get a list of all months of that year that have an
      * appointment. these months are then set in the ComboBox
      */
@@ -227,6 +198,8 @@ public class Filter extends Base implements Initializable {
     }
 
     /**
+     * lambda1: ensures the callback is always called
+     * <p>
      * opens the filter window
      *
      * @param callback a method that will execute a sql query with arguments from the FilterFields instance
@@ -248,6 +221,41 @@ public class Filter extends Base implements Initializable {
             System.out.println(ex);
             ex.printStackTrace();
             handleClose(null);
+        }
+    }
+
+    /**
+     * the object that is returned after the filter is applied. it contains the values to be used an arguments for the
+     * query
+     */
+    public static class FilterFields {
+        final public int year;
+        final public String field;
+        final public int fieldValue;
+
+        public FilterFields(int year, String field, int fieldValue) {
+            this.year = year;
+            this.field = field;
+            this.fieldValue = fieldValue;
+        }
+    }
+
+    /**
+     * an object to hold ComboBox values. there is an internal value for use in querying and a display value for the
+     * user to interact with
+     */
+    private static class ComboBoxValue {
+        final public int value;
+        final private String display;
+
+        public ComboBoxValue(String display, int value) {
+            this.display = display;
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return display;
         }
     }
 }

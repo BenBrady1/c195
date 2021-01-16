@@ -18,10 +18,22 @@ import java.util.function.BiFunction;
  * an abstract base controller class with helper methods that can be used across controllers
  */
 abstract public class Base {
-    private static Locale coercedLocale = coerceLocale();
     protected static ResourceBundle bundle;
     protected static Connection conn;
     protected static long userId = 0L;
+    private static Locale coercedLocale = coerceLocale();
+    protected View viewController;
+
+    {
+        if (conn == null) {
+            try {
+                createDatabaseConnection();
+            } catch (SQLException ex) {
+                printSQLException(ex);
+                conn = null;
+            }
+        }
+    }
 
     /**
      * Sets the locale to be used for the duration of the program
@@ -61,19 +73,6 @@ abstract public class Base {
     public static void setLocaleAndBundle() {
         coercedLocale = coerceLocale();
         bundle = ResourceBundle.getBundle("App", getLocale());
-    }
-
-    protected View viewController;
-
-    {
-        if (conn == null) {
-            try {
-                createDatabaseConnection();
-            } catch (SQLException ex) {
-                printSQLException(ex);
-                conn = null;
-            }
-        }
     }
 
     /**
@@ -119,10 +118,12 @@ abstract public class Base {
     }
 
     /**
+     * lambda1: lambda to consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * A wrapper around Base#executeQuery(String, Object[], BiFunction) for when there are no arguments and a value is
      * needed from the callback function
      *
-     * @param <T> whatever value the handler returns
+     * @param <T>     whatever value the handler returns
      * @param query   the query to execute
      * @param handler a function to handle any errors or result sets from the query
      * @return the value from the handler
@@ -134,6 +135,8 @@ abstract public class Base {
     }
 
     /**
+     * lambda1: lambda to consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * A wrapper around Base#executeQuery(String, Object[], BiFunction) for when there are no arguments and no value is
      * needed from the callback function
      *
@@ -150,6 +153,8 @@ abstract public class Base {
     }
 
     /**
+     * lambda1: lambda to consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * A wrapper around Base#executeQuery(String, Object[], BiFunction) for when no value is needed from the callback
      * function
      *
@@ -171,7 +176,7 @@ abstract public class Base {
      * for a Node-esque error-first callback style. This allows for the caller to consume the result
      * set or error and for the resources to be cleaned up in a DRY manner
      *
-     * @param <T> whatever value the handler returns
+     * @param <T>       whatever value the handler returns
      * @param query     the query to execute
      * @param arguments an array of arguments
      * @param handler   a function to handle any errors or result sets from the query, its return value will be returned
@@ -221,6 +226,8 @@ abstract public class Base {
     }
 
     /**
+     * lambda1: lambda to consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * a wrapper around Base#executeUpdate(String, List, BiFunction) for when the caller does not need to return any
      * value from the callback
      *

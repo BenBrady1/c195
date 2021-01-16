@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class Customer extends Record implements Model<Customer>, Reportable {
+    private final String address;
+    private final String postalCode;
+    private final String phone;
     private String name;
-    private String address;
-    private String postalCode;
-    private String phone;
     private long divisionId;
 
     public Customer(long id, String name, String address, String postalCode, String phone, long divisionId) {

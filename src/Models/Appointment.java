@@ -1,16 +1,17 @@
 package Models;
 
-import java.sql.SQLException;
-import java.time.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Appointment extends Record implements Model<Appointment>, Reportable {
+    private final String description;
+    private final String location;
     private String title;
-    private String description;
-    private String location;
     private String type;
     private LocalDateTime start;
     private LocalDateTime end;

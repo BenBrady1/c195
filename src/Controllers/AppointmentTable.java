@@ -15,15 +15,13 @@ import java.sql.SQLException;
 import java.util.*;
 
 public final class AppointmentTable extends Table<Appointment> implements Initializable {
-    private Filter filterController = new Filter();
-    private Filter.FilterFields currentFilter = null;
-
-    private HashMap<Long, Contact> contactMap = new HashMap<>();
-
-    private ObservableList<Customer> customers;
+    private final Filter filterController = new Filter();
+    private final HashMap<Long, Contact> contactMap = new HashMap<>();
+    private final ObservableList<Customer> customers;
     private final String selectQuery = "SELECT Appointment_ID, Title, Description, `Location`, `Type`, `Start`, " +
             "`End`, Customer_ID, User_ID, Contact_ID " +
             "FROM appointments";
+    private Filter.FilterFields currentFilter = null;
 
     public AppointmentTable(ObservableList<Customer> customers, Main.EventEmitter eventEmitter) {
         super(new AppointmentFormFactory(Appointment.class), eventEmitter);
@@ -41,6 +39,11 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
     }
 
     /**
+     * lambda1: correctly translate a contact id into a contact name
+     * lambda2: correctly translate a start time into the local time zone
+     * lambda3: correctly translate an end time into the local time zone
+     * lambda4: correctly display a customer id, if valid
+     *
      * @see Table#addColumns()
      */
     @Override
@@ -212,6 +215,8 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
     }
 
     /**
+     * lambda1: registers a callback with the filter controller so we know when the filter can be applied
+     *
      * @see Table#addFilter()
      */
     @Override
@@ -224,6 +229,8 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     *
      * @see Table#canUpdate(Record)
      */
     @Override

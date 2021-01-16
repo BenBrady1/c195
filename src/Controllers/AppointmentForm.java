@@ -17,10 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class AppointmentForm extends Form<Appointment> {
+    final boolean use24HourTime = LocalTime.of(23, 00)
+            .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+            .matches("^23.+00$");
+    private final Map<Long, Contact> contactMap;
+    private final HashMap<Long, Customer> customerMap = new HashMap<>();
+    private final HashMap<Long, User> userMap = new HashMap<>();
     @FXML
     private DatePicker startDatePicker;
     @FXML
@@ -51,13 +56,6 @@ public class AppointmentForm extends Form<Appointment> {
     private TextField locationField;
     @FXML
     private TextField typeField;
-
-    private final Map<Long, Contact> contactMap;
-    private final HashMap<Long, Customer> customerMap = new HashMap<>();
-    private final HashMap<Long, User> userMap = new HashMap<>();
-    final boolean use24HourTime = LocalTime.of(23, 00)
-            .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
-            .matches("^23.+00$");
 
     public AppointmentForm(String windowTitle,
                            Map<Long, Contact> contactMap,
@@ -212,6 +210,8 @@ public class AppointmentForm extends Form<Appointment> {
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     * <p>
      * creates a map of User Id to User object for easy lookup
      */
     private void buildUserMap() {

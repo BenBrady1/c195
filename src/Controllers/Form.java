@@ -28,17 +28,16 @@ import java.util.function.Function;
  * @param <T> a subclass of the Record model that can be updated/created by the Form subclass
  */
 public abstract class Form<T extends Record> extends Base implements Initializable {
+    private final FormFactory.Mode mode;
+    private final String windowTitle;
     @FXML
     protected TextField idField;
-    @FXML
-    private ButtonBar buttonBar;
-
-    private FormFactory.Mode mode;
     protected T record;
     protected boolean readOnly = true;
     protected Function<T, Boolean> callback;
+    @FXML
+    private ButtonBar buttonBar;
     private Stage stage;
-    private final String windowTitle;
 
     public Form(String windowTitle, FormFactory.Mode mode, T record, Function<T, Boolean> callback) {
         this.windowTitle = windowTitle;
@@ -52,7 +51,7 @@ public abstract class Form<T extends Record> extends Base implements Initializab
     public void initialize(URL url, ResourceBundle resourceBundle) {
         if (record.getId() != 0) idField.setText(Long.toString(record.getId()));
         idField.setDisable(true);
-        if (mode != FormFactory.Mode.Create.Create) {
+        if (mode != FormFactory.Mode.Create) {
             if (mode == FormFactory.Mode.Read) {
                 buttonBar.setVisible(false);
             }
@@ -174,6 +173,8 @@ public abstract class Form<T extends Record> extends Base implements Initializab
     protected abstract double getHeight();
 
     /**
+     * lambda1: ensures the callback is always called
+     * <p>
      * Opens a new window with the correct form for the controller
      */
     private void openForm() {
@@ -196,6 +197,8 @@ public abstract class Form<T extends Record> extends Base implements Initializab
     }
 
     /**
+     * lambda1: iterate over all the fields. cleaner and more readable than an anonymous class
+     * <p>
      * uses #iterateStringFields to set values from the record to the form
      *
      * @see Form#iterateStringFields(BiConsumer)
@@ -214,6 +217,8 @@ public abstract class Form<T extends Record> extends Base implements Initializab
     }
 
     /**
+     * lambda1: iterate over all the fields. cleaner and more readable than an anonymous class
+     * <p>
      * uses #iterateStringFields to set values from the form to the record
      *
      * @see Form#iterateStringFields(BiConsumer)

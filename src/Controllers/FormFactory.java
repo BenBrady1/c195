@@ -2,7 +2,6 @@ package Controllers;
 
 import Models.Record;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -13,12 +12,6 @@ import java.util.function.Function;
  */
 public abstract class FormFactory<R extends Record, T extends Form<R>> extends Base {
     private final Class<R> modelClass;
-
-    enum Mode {
-        Create,
-        Read,
-        Update
-    }
 
     public FormFactory(Class<R> modelClass) {
         this.modelClass = modelClass;
@@ -43,4 +36,10 @@ public abstract class FormFactory<R extends Record, T extends Form<R>> extends B
      * @return the form controller instance
      */
     abstract public T getInstance(Mode mode, R record, Function<R, Boolean> callback);
+
+    enum Mode {
+        Create,
+        Read,
+        Update
+    }
 }

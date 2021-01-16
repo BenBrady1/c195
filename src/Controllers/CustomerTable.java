@@ -24,6 +24,9 @@ public final class CustomerTable extends Table<Customer> {
     }
 
     /**
+     * lambda1: properly convert a division id into a displayable division name
+     * lambda2: properly convert a country id into a displayable country name
+     *
      * @see Table#addColumns()
      */
     @Override
@@ -48,6 +51,8 @@ public final class CustomerTable extends Table<Customer> {
     }
 
     /**
+     * lambda1-4: consume an exception and result set and allow for DRY resource cleanup
+     *
      * @see Table#populateData()
      */
     @Override
@@ -166,6 +171,8 @@ public final class CustomerTable extends Table<Customer> {
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     *
      * @see Table#deleteDependencies(Record)
      */
     @Override
@@ -175,27 +182,15 @@ public final class CustomerTable extends Table<Customer> {
     }
 
     /**
+     * lambda1: consume an exception and result set and allow for DRY resource cleanup
+     *
      * @see Table#getDeletedMessage(Record)
      */
     @Override
     protected String getDeletedMessage(Customer customer) {
         final String appointments = executeQuery("SELECT Appointment_ID, Type FROM appointments WHERE Customer_ID = ?",
                 toArray(customer.getId()),
-                (ex, rs) -> {
-                    String output = "";
-                    try {
-                        while (rs.next()) {
-                            output += String.format("%s: %d, %s: %s\n",
-                                    bundle.getString("record.deleted.id"),
-                                    rs.getInt(1),
-                                    bundle.getString("appointment.type"),
-                                    rs.getString(2));
-                        }
-                    } catch (SQLException exception) {
-                        exception.printStackTrace();
-                    }
-                    return output;
-                });
+                this::parseAppointments);
 
         String message = bundle.getString("record.deleted.message")
                 .replace("%{record}", bundle.getString("customer.customer"));
@@ -205,6 +200,30 @@ public final class CustomerTable extends Table<Customer> {
         }
 
         return message;
+    }
+
+    /**
+     * parses the appointments that got deleted in association with a customer record
+     *
+     * @param ex a sql exception from the query
+     * @param rs the result set containing the appointment rows
+     * @return the string to display
+     */
+    private String parseAppointments(SQLException ex, ResultSet rs) {
+        String output = "";
+        if (ex != null) return output;
+        try {
+            while (rs.next()) {
+                output += String.format("%s: %d, %s: %s\n",
+                        bundle.getString("record.deleted.id"),
+                        rs.getInt(1),
+                        bundle.getString("appointment.type"),
+                        rs.getString(2));
+            }
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+        return output;
     }
 
     /**
