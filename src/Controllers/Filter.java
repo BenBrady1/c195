@@ -88,7 +88,8 @@ public class Filter extends Base implements Initializable {
 
     /**
      * used to populate the month/week ComboBox with the appropriate values for the selected year
-     *
+     * @param observable not used
+     * @param oldValue not used
      * @param newValue the radio button that has been selected
      */
     private void updateItems(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {

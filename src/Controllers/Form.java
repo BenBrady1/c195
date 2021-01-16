@@ -63,6 +63,7 @@ public abstract class Form<T extends Record> extends Base implements Initializab
 
     /**
      * Opens a form to create/view/update a record
+     * @return this
      */
     public Form<T> open() {
         openForm();

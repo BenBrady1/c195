@@ -211,7 +211,7 @@ public class AppointmentForm extends Form<Appointment> {
     }
 
     /**
-     * creates a map of User Id => User object for easy lookup
+     * creates a map of User Id to User object for easy lookup
      */
     private void buildUserMap() {
         // lambda to consume an exception and result set and allow for DRY resource cleanup

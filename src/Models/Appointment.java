@@ -197,7 +197,7 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
      *
      * @param date the start or end date and time
      * @param name the name of the field
-     * @throws ValidationError
+     * @throws ValidationError an error saying the value is out of range
      */
     private void checkDateRange(ZonedDateTime date, String name) throws ValidationError {
         if (date.getHour() < 8 || date.getHour() > 22 || (date.getHour() == 22 && date.getMinute() != 0)) {

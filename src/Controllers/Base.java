@@ -122,8 +122,10 @@ abstract public class Base {
      * A wrapper around Base#executeQuery(String, Object[], BiFunction) for when there are no arguments and a value is
      * needed from the callback function
      *
+     * @param <T> whatever value the handler returns
      * @param query   the query to execute
      * @param handler a function to handle any errors or result sets from the query
+     * @return the value from the handler
      * @see Base#executeQuery(String, List, BiFunction)
      */
     protected <T> T executeQuery(String query, BiFunction<SQLException, ResultSet, T> handler) {
@@ -169,10 +171,12 @@ abstract public class Base {
      * for a Node-esque error-first callback style. This allows for the caller to consume the result
      * set or error and for the resources to be cleaned up in a DRY manner
      *
+     * @param <T> whatever value the handler returns
      * @param query     the query to execute
      * @param arguments an array of arguments
      * @param handler   a function to handle any errors or result sets from the query, its return value will be returned
      *                  from this function
+     * @return the value from the handler
      */
     protected <T> T executeQuery(String query, List<Object> arguments, BiFunction<SQLException, ResultSet, T> handler) {
         try (var stmt = createDatabaseConnection().prepareStatement(query)) {
