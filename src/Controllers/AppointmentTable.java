@@ -224,14 +224,19 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
     protected boolean canUpdate(Appointment record) {
         String query = "SELECT COUNT(*) FROM appointments " +
                 "WHERE (UNIX_TIMESTAMP(`START`) BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)" +
-                "OR UNIX_TIMESTAMP(`END`) BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?))";
-        final List<Object> arguments = toArray(record.getSQLStart(), record.getSQLEnd(), record.getSQLStart(), record.getSQLEnd());
+                "OR UNIX_TIMESTAMP(`END`) BETWEEN UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(?)) " +
+                "AND Customer_ID = ?";
+        final List<Object> arguments = toArray(record.getSQLStart(),
+                record.getSQLEnd(),
+                record.getSQLStart(),
+                record.getSQLEnd(),
+                record.getCustomerId());
         if (record.getId() != 0L) {
             query += " AND Appointment_Id != ?";
             arguments.add(record.getId());
         }
         // lambda to consume an exception and result set and allow for DRY resource cleanup
-        return executeQuery(query, arguments, (ex, rs) -> {
+        final boolean noOverlaps = executeQuery(query, arguments, (ex, rs) -> {
             if (ex != null) return false;
             try {
                 rs.next();
@@ -241,5 +246,11 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
                 return false;
             }
         });
+
+        if (!noOverlaps) {
+            displayError(bundle.getString("error.overlapping"));
+        }
+
+        return noOverlaps;
     }
 }
