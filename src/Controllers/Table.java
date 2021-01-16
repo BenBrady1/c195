@@ -129,6 +129,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
      * executes a SQL insert statement for the given record
      *
      * @param record the record to insert
+     * @return whether the form can close or not
      */
     private boolean addToDatabase(T record) {
         final boolean updatable = canUpdate(record);
@@ -206,6 +207,7 @@ public abstract class Table<T extends Record & Model<T>> extends Base implements
      * opens the edit form and saves the changes to the database
      *
      * @param record the record to update
+     * @return whether the form can close or not
      */
     protected boolean updateInDatabase(T record) {
         final boolean updatable = canUpdate(record);
