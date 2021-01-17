@@ -133,7 +133,7 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
      * @param date the date to format
      * @return the string for the sql query
      */
-    private String formatSQLDate(LocalDateTime date) {
+    private static String formatSQLDate(LocalDateTime date) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return formatter.format(date.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneId.of("UTC")));
     }
@@ -158,7 +158,7 @@ public class Appointment extends Record implements Model<Appointment>, Reportabl
      * @param date the date to format
      * @return the string to display
      */
-    private String formatLocalDate(LocalDateTime date) {
+    public static String formatLocalDate(LocalDateTime date) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale);
         return date.format(formatter);
     }

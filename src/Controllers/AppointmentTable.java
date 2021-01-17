@@ -195,7 +195,7 @@ public final class AppointmentTable extends Table<Appointment> implements Initia
     protected String getDeletedMessage(Appointment appointment) {
         final String replacement = String.format("%s (%s: %d, %s: %s)",
                 bundle.getString("appointment.appointment"),
-                bundle.getString("record.deleted.id"),
+                bundle.getString("record.id"),
                 appointment.getId(),
                 bundle.getString("appointment.type"),
                 appointment.getType());

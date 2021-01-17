@@ -1,9 +1,6 @@
 package Controllers;
 
-import Models.Country;
-import Models.Customer;
-import Models.Division;
-import Models.Record;
+import Models.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
@@ -51,7 +48,7 @@ public final class CustomerTable extends Table<Customer> {
     }
 
     /**
-     * lambda1-4: consume an exception and result set and allow for DRY resource cleanup
+     * lambda1-3: consume an exception and result set and allow for DRY resource cleanup
      *
      * @see Table#populateData()
      */
@@ -71,23 +68,41 @@ public final class CustomerTable extends Table<Customer> {
                 "JOIN first_level_divisions d ON d.Division_ID = c.Division_ID;", (ex, rs) -> {
             if (ex == null) consumeResultSet(rs);
         });
-        // lambda to consume an exception and result set and allow for DRY resource cleanup
-        executeQuery("SELECT COUNT(*) FROM appointments " +
-                "WHERE `Start` BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE)", (ex, rs) -> {
-            if (ex != null) return;
-            try {
-                rs.next();
-                String alertBody;
-                alertBody = rs.getInt("COUNT(*)") != 0
-                        ? bundle.getString("appointment.upcomingAppointment")
-                        : bundle.getString("appointment.noUpcomingAppointment");
-                displayAlert(bundle.getString("appointment.alertTitle"),
-                        alertBody,
-                        Alert.AlertType.INFORMATION);
-            } catch (SQLException exception) {
-                printSQLException(exception);
+        executeQuery("SELECT Appointment_ID, `Start` FROM appointments " +
+                "WHERE `Start` BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 15 MINUTE) " +
+                "AND User_ID = ?", toArray(userId), this::notifyOfAppointments);
+    }
+
+    /**
+     * consumes the result of the query for appointments within the next 15 minutes. if there are no upcoming
+     * appointments, it displays a message saying so. otherwise it displays a list of all the appointments in that
+     * timeframe.
+     *
+     * @param ex a sql exception from the query
+     * @param rs the result set containing the appointment rows
+     */
+    private void notifyOfAppointments(SQLException ex, ResultSet rs) {
+        if (ex != null) return;
+        final StringBuilder appointments = new StringBuilder();
+        try {
+            while (rs.next()) {
+                appointments
+                        .append("\n")
+                        .append(bundle.getString("record.id"))
+                        .append(" ")
+                        .append(rs.getInt(1))
+                        .append(" ")
+                        .append(bundle.getString("appointment.at"))
+                        .append(" ")
+                        .append(Appointment.formatLocalDate(rs.getTimestamp(2).toLocalDateTime()));
             }
-        });
+            final String alertBody = appointments.length() != 0
+                    ? bundle.getString("appointment.upcomingAppointment") + "\n" + appointments
+                    : bundle.getString("appointment.noUpcomingAppointment");
+            displayAlert(bundle.getString("appointment.alertTitle"), alertBody, Alert.AlertType.INFORMATION);
+        } catch (SQLException exception) {
+            printSQLException(exception);
+        }
     }
 
     private void buildDivisionMap(ResultSet rs) {
@@ -210,20 +225,20 @@ public final class CustomerTable extends Table<Customer> {
      * @return the string to display
      */
     private String parseAppointments(SQLException ex, ResultSet rs) {
-        String output = "";
-        if (ex != null) return output;
+        final StringBuilder output = new StringBuilder();
+        if (ex != null) return output.toString();
         try {
             while (rs.next()) {
-                output += String.format("%s: %d, %s: %s\n",
-                        bundle.getString("record.deleted.id"),
+                output.append(String.format("%s: %d, %s: %s\n",
+                        bundle.getString("record.id"),
                         rs.getInt(1),
                         bundle.getString("appointment.type"),
-                        rs.getString(2));
+                        rs.getString(2)));
             }
         } catch (SQLException exception) {
             exception.printStackTrace();
         }
-        return output;
+        return output.toString();
     }
 
     /**

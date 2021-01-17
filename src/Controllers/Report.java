@@ -76,17 +76,17 @@ public class Report extends Base {
      */
     private String parseMonthsCount(SQLException ex, ResultSet rs) {
         if (ex != null) return "";
-        String output = "";
+        final StringBuilder output = new StringBuilder();
         try {
             while (rs.next()) {
                 final String month;
                 month = bundle.getString(String.format("month.%d", rs.getInt(1)));
-                output += String.format("\t%s:\t%d\n", month, rs.getInt(2));
+                output.append(String.format("\t%s:\t%d\n", month, rs.getInt(2)));
             }
         } catch (SQLException exception) {
             printSQLException(exception);
         }
-        return output;
+        return output.toString();
     }
 
     /**
@@ -131,7 +131,7 @@ public class Report extends Base {
      */
     private String parseContactsAndAppointments(SQLException ex, ResultSet rs) {
         if (ex != null) return "";
-        String output = "";
+        final StringBuilder output = new StringBuilder();
         try {
             while (rs.next()) {
                 long customerId = 0L;
@@ -147,16 +147,16 @@ public class Report extends Base {
                         rs.getLong(10));
                 if (customerId != appointment.getCustomerId()) {
                     customerId = appointment.getCustomerId();
-                    output += "\n";
-                    output += new Contact(rs.getLong(10), rs.getString(11), rs.getString(12)).toReportString();
+                    output.append("\n");
+                    output.append(new Contact(rs.getLong(10), rs.getString(11), rs.getString(12)).toReportString());
                 }
-                output += appointment.toReportString();
+                output.append(appointment.toReportString());
             }
         } catch (SQLException exception) {
             printSQLException(exception);
         }
 
-        return output;
+        return output.toString();
     }
 
     /**
@@ -180,7 +180,7 @@ public class Report extends Base {
      */
     private String parseCustomersAndDivisions(SQLException ex, ResultSet rs) {
         if (ex != null) return "";
-        String output = "";
+        final StringBuilder output = new StringBuilder();
         try {
             long divisionId = 0L;
             while (rs.next()) {
@@ -194,15 +194,15 @@ public class Report extends Base {
                 );
                 if (divisionId != customer.getDivisionId()) {
                     divisionId = customer.getDivisionId();
-                    output += "\n";
-                    output += new Division(rs.getLong(6), rs.getString(8), rs.getLong(7)).toReportString();
+                    output.append("\n");
+                    output.append(new Division(rs.getLong(6), rs.getString(8), rs.getLong(7)).toReportString());
                 }
-                output += customer.toReportString();
+                output.append(customer.toReportString());
             }
         } catch (SQLException exception) {
             exception.printStackTrace();
         }
 
-        return output;
+        return output.toString();
     }
 }
